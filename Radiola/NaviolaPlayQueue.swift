@@ -44,7 +44,7 @@ class NaviolaPlayQueue: ObservableObject {
 
     /// When the current track started playing — used to determine if a track
     /// ended naturally (elapsed ≈ duration) vs user paused mid-track.
-    private var trackStartTime: Date?
+    private(set) var trackStartTime: Date?
 
     init() {
         NotificationCenter.default.addObserver(
@@ -183,20 +183,31 @@ class NaviolaPlayQueue: ObservableObject {
                 return
             }
 
-            // Determine if the track ended naturally by comparing elapsed time to duration.
-            // If elapsed >= (duration - tolerance), the track played through → advance.
-            // Otherwise, the user paused mid-track → stop the queue.
-            let tolerance: TimeInterval = 5.0
-            if let startTime = trackStartTime,
-               let duration = current.duration,
-               duration > 0 {
-                let elapsed = Date().timeIntervalSince(startTime)
-                let trackDuration = Double(duration)
+            // Determine if the track ended naturally vs user paused.
+            //
+            // Heuristic: if the track played for at least 80% of its reported duration
+            // (or at least 10 seconds if no duration), treat as natural end → advance.
+            // Short plays (< min threshold) are user pauses → stop queue.
+            //
+            // The 80% threshold accounts for: encoding differences, buffering,
+            // Navidrome reporting slightly different durations than actual audio.
+            let minPlaySeconds: TimeInterval = 10.0
 
-                if elapsed >= trackDuration - tolerance {
-                    // Track ended naturally — advance after a brief cleanup delay
+            if let startTime = trackStartTime {
+                let elapsed = Date().timeIntervalSince(startTime)
+
+                let isNaturalEnd: Bool
+                if let duration = current.duration, duration > 0 {
+                    let trackDuration = Double(duration)
+                    isNaturalEnd = elapsed >= trackDuration * 0.8
+                } else {
+                    // No duration info — use minimum play time as fallback
+                    isNaturalEnd = elapsed >= minPlaySeconds
+                }
+
+                if isNaturalEnd {
                     trackStartTime = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                         self?.next()
                     }
                 } else {
@@ -204,7 +215,6 @@ class NaviolaPlayQueue: ObservableObject {
                     stop()
                 }
             } else {
-                // No duration info or start time — can't determine, stop queue
                 stop()
             }
         }

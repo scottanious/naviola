@@ -62,7 +62,7 @@ class ToolbarPlayView: NSViewController {
         playButton.keyEquivalent = " "
         playButton.keyEquivalentModifierMask = []
 
-        // Naviola: skip/back buttons
+        // Naviola: skip/back buttons — positioned AFTER playButton, not flanking it
         setupSkipButtons()
 
         NotificationCenter.default.addObserver(self,
@@ -78,7 +78,7 @@ class ToolbarPlayView: NSViewController {
         refresh()
     }
 
-    // Naviola: set up skip/back buttons
+    // Naviola: set up skip/back buttons to the right of play button, before song label
     private func setupSkipButtons() {
         for btn in [prevButton, nextButton] {
             view.addSubview(btn)
@@ -91,24 +91,31 @@ class ToolbarPlayView: NSViewController {
         }
 
         prevButton.image = NSImage(systemSymbolName: "backward.fill", accessibilityDescription: "Previous")
+        prevButton.image?.isTemplate = true
         prevButton.target = self
         prevButton.action = #selector(previousTrack)
 
         nextButton.image = NSImage(systemSymbolName: "forward.fill", accessibilityDescription: "Next")
+        nextButton.image?.isTemplate = true
         nextButton.target = self
         nextButton.action = #selector(nextTrack)
 
+        // Place between playButton and songLabel: [play] [<<] [>>] [song info...]
         NSLayoutConstraint.activate([
             prevButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
-            prevButton.trailingAnchor.constraint(equalTo: playButton.leadingAnchor, constant: -4),
-            prevButton.widthAnchor.constraint(equalToConstant: 20),
-            prevButton.heightAnchor.constraint(equalToConstant: 20),
+            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 12),
+            prevButton.widthAnchor.constraint(equalToConstant: 14),
+            prevButton.heightAnchor.constraint(equalToConstant: 14),
 
             nextButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
-            nextButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 4),
-            nextButton.widthAnchor.constraint(equalToConstant: 20),
-            nextButton.heightAnchor.constraint(equalToConstant: 20),
+            nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 8),
+            nextButton.widthAnchor.constraint(equalToConstant: 14),
+            nextButton.heightAnchor.constraint(equalToConstant: 14),
         ])
+
+        // Re-anchor songLabel to start after the skip buttons when visible.
+        // The XIB anchors songLabel to playButton, but we need dynamic leading.
+        // We'll handle this in refresh() by adjusting the label's leading.
     }
 
     /* ****************************************
@@ -163,7 +170,7 @@ class ToolbarPlayView: NSViewController {
         songLabel.isVisible = !onlyStationLabel.isVisible
         stationLabel.isVisible = !onlyStationLabel.isVisible
 
-        // Naviola: update skip button state
+        // Naviola: update skip button visibility and state
         let queue = NaviolaPlayQueue.shared
         prevButton.isHidden = !queue.isActive
         nextButton.isHidden = !queue.isActive

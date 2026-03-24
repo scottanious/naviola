@@ -169,26 +169,29 @@ class StatusBarController: NSObject, NSMenuDelegate {
         playItem.isEnabled = true
         menu.addItem(playItem)
 
-        // Naviola: Skip/back and repeat/shuffle controls when play queue is active
-        NaviolaPlaybackMenu.addPlaybackControls(to: menu)
+        // Naviola: Consolidated controls section (playback + volume)
+        NaviolaPlaybackMenu.addControls(to: menu, showVolume: settings.showVolumeInMenu, showMute: settings.showMuteInMenu)
 
-        if settings.showVolumeInMenu {
-            menu.addItem(NSMenuItem.separator())
-            menu.addItem(NSMenuItem(title: NSLocalizedString("Volume", comment: "Status bar menu item"), action: nil, keyEquivalent: ""))
-            let volumeItem = VolumeMenuItem(showMuteButton: settings.showMuteInMenu)
-            menu.addItem(volumeItem)
-        }
+        // Upstream volume/mute only when no play queue active
+        if !NaviolaPlayQueue.shared.isActive {
+            if settings.showVolumeInMenu {
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(NSMenuItem(title: NSLocalizedString("Volume", comment: "Status bar menu item"), action: nil, keyEquivalent: ""))
+                let volumeItem = VolumeMenuItem(showMuteButton: settings.showMuteInMenu)
+                menu.addItem(volumeItem)
+            }
 
-        if settings.showMuteInMenu && !settings.showVolumeInMenu {
-            menu.addItem(NSMenuItem.separator())
-            let item = NSMenuItem(
-                title: player.isMuted ?
-                    NSLocalizedString("Unmute", comment: "Status bar menu Item") :
-                    NSLocalizedString("Mute", comment: "Status bar menu Item"),
-                action: #selector(Player.toggleMute),
-                keyEquivalent: "m")
-            item.target = player
-            menu.addItem(item)
+            if settings.showMuteInMenu && !settings.showVolumeInMenu {
+                menu.addItem(NSMenuItem.separator())
+                let item = NSMenuItem(
+                    title: player.isMuted ?
+                        NSLocalizedString("Unmute", comment: "Status bar menu Item") :
+                        NSLocalizedString("Mute", comment: "Status bar menu Item"),
+                    action: #selector(Player.toggleMute),
+                    keyEquivalent: "m")
+                item.target = player
+                menu.addItem(item)
+            }
         }
 
         menu.addItem(NSMenuItem.separator())
