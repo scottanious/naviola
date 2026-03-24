@@ -88,8 +88,8 @@ Update sidebar to show pinned items under "My Lists" or a new "Pinned" section. 
 Phases 0-5.
 
 ## Status
-- [ ] 8.1 NaviolaPinnedItem model + persistence
-- [ ] 8.2 NaviolaPlayQueue
-- [ ] 8.3 Rework pin button
-- [ ] 8.4 Menu bar integration
-- [ ] 8.5 Sidebar pinned section
+- [x] 8.1 NaviolaPinnedItem model + persistence
+- [x] 8.2 NaviolaPlayQueue
+- [x] 8.3 Rework pin button
+- [x] 8.4 Menu bar integration
+- [x] 8.5 Play queue from browse (double-click track → album queue; double-click album → full queue)

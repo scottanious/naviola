@@ -110,41 +110,29 @@ class NavidromeAlbumRow: NSView {
     }
 
     @objc private func pinButtonClicked() {
-        Task { @MainActor in
-            do {
-                try await album.loadTracks()
-                pinAlbumToLocal()
-                refreshPinButton()
-            } catch {
-                warning("Failed to load tracks for pinning: \(error)")
-            }
+        let store = NaviolaPinnedItemStore.shared
+        if store.isPinned(subsonicId: album.navidromeId) {
+            store.remove(subsonicId: album.navidromeId)
+        } else {
+            var subtitle = ""
+            var parts = [String]()
+            if let count = album.songCount { parts.append("\(count) tracks") }
+            if let year = album.year { parts.append(String(year)) }
+            subtitle = parts.joined(separator: " · ")
+
+            let item = NaviolaPinnedItem(
+                type: .album,
+                title: albumDisplayTitle(),
+                subtitle: subtitle.isEmpty ? nil : subtitle,
+                subsonicId: album.navidromeId,
+                coverArtId: album.coverArtId
+            )
+            store.add(item)
         }
+        refreshPinButton()
     }
 
-    private func pinAlbumToLocal() {
-        guard let list = AppState.shared.localStations.first else { return }
-
-        // Check if already pinned (by matching group title)
-        let groupTitle = albumGroupTitle()
-        if list.firstGroup(where: { $0.title == groupTitle }) != nil { return }
-
-        let group = list.createGroup(title: groupTitle)
-        for track in album.tracks {
-            let trackTitle: String
-            if let num = track.trackNumber {
-                trackTitle = "\(num). \(track.title)"
-            } else {
-                trackTitle = track.title
-            }
-            let station = list.createStation(title: trackTitle, url: track.url)
-            station.isFavorite = true
-            group.append(station)
-        }
-        list.append(group)
-        list.trySave()
-    }
-
-    private func albumGroupTitle() -> String {
+    private func albumDisplayTitle() -> String {
         if let artist = album.artist {
             return "\(artist) - \(album.title)"
         }
@@ -152,16 +140,15 @@ class NavidromeAlbumRow: NSView {
     }
 
     private func isPinned() -> Bool {
-        guard let list = AppState.shared.localStations.first else { return false }
-        return list.firstGroup(where: { $0.title == albumGroupTitle() }) != nil
+        return NaviolaPinnedItemStore.shared.isPinned(subsonicId: album.navidromeId)
     }
 
     private func refreshPinButton() {
         let pinned = isPinned()
         pinButton.image = pinIcons[pinned]!
         pinButton.toolTip = pinned ?
-            NSLocalizedString("Album pinned to My lists", comment: "Pin button tooltip") :
-            NSLocalizedString("Pin album to My lists", comment: "Pin button tooltip")
+            NSLocalizedString("Pinned — click to unpin", comment: "Pin button tooltip") :
+            NSLocalizedString("Pin album", comment: "Pin button tooltip")
     }
 }
 

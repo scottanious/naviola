@@ -104,6 +104,9 @@
 		AAAA00012024120600000006 /* HistorySearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000007 /* HistorySearchPanel.swift */; };
 		AAAA00012024120600000008 /* LocalStationSearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000009 /* LocalStationSearchPanel.swift */; };
 		BB0001012F40C00100000002 /* NaviolaSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001012F40C00100000001 /* NaviolaSettings.swift */; };
+		DD0002013A50A00100000002 /* NaviolaPinnedItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */; };
+		DD0002013A50A00100000004 /* NaviolaPlayQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */; };
+		DD0002013A50A00100000006 /* NaviolaMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */; };
 		BB0001012F40C00100000004 /* NavidromePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001012F40C00100000003 /* NavidromePage.swift */; };
 		CC0001012F40D00100000002 /* NavidromeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000001 /* NavidromeProvider.swift */; };
 		CC0001012F40D00100000004 /* NavidromeStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000003 /* NavidromeStations.swift */; };
@@ -223,6 +226,9 @@
 		AAAA00012024120600000007 /* HistorySearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistorySearchPanel.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000009 /* LocalStationSearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStationSearchPanel.swift; sourceTree = "<group>"; };
 		BB0001012F40C00100000001 /* NaviolaSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaSettings.swift; sourceTree = "<group>"; };
+		DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPinnedItems.swift; sourceTree = "<group>"; };
+		DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPlayQueue.swift; sourceTree = "<group>"; };
+		DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaMenuBuilder.swift; sourceTree = "<group>"; };
 		BB0001012F40C00100000003 /* NavidromePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromePage.swift; sourceTree = "<group>"; };
 		CC0001012F40D00100000001 /* NavidromeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeProvider.swift; sourceTree = "<group>"; };
 		CC0001012F40D00100000003 /* NavidromeStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeStations.swift; sourceTree = "<group>"; };
@@ -344,6 +350,8 @@
 				394F8A56287394F1005EA7FA /* Notifications.swift */,
 				39D79E622933BEAB00210D94 /* Settings.swift */,
 				BB0001012F40C00100000001 /* NaviolaSettings.swift */,
+				DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */,
+				DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */,
 				39E8DFD62890839500082467 /* Updater.swift */,
 				39ADF3832C98D4C9009794C3 /* MainMenu.xib */,
 				394F8A402873933A005EA7FA /* Assets.xcassets */,
@@ -471,6 +479,7 @@
 				39121EAF2A373954004AB7D4 /* StatusBarIcon.swift */,
 				39EF8B9D2BCC151A00733571 /* PlayMenuItem.swift */,
 				39E042CE293B3AC900A2167E /* VolumeMenuItem.swift */,
+				DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */,
 			);
 			path = StatusBar;
 			sourceTree = "<group>";
@@ -710,6 +719,9 @@
 				CC0001012F40D00100000006 /* NavidromeStationDelegate.swift in Sources */,
 				CC0001012F40D00100000008 /* NavidromeStationRows.swift in Sources */,
 				CC0001012F40D0010000000A /* NavidromeSearchPanel.swift in Sources */,
+				DD0002013A50A00100000002 /* NaviolaPinnedItems.swift in Sources */,
+				DD0002013A50A00100000004 /* NaviolaPlayQueue.swift in Sources */,
+				DD0002013A50A00100000006 /* NaviolaMenuBuilder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

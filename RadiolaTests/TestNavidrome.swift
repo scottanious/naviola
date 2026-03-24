@@ -180,4 +180,47 @@ final class TestNavidrome: XCTestCase {
         XCTAssertEqual(queryDict["size"], "150")
         XCTAssertEqual(queryDict["u"], "user")
     }
+
+    // MARK: - NaviolaPinnedItemStore Tests
+
+    func testPinnedItemStoreAddRemove() throws {
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_pinned_\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        let store = NaviolaPinnedItemStore(fileURL: tempURL)
+        XCTAssertEqual(store.items.count, 0)
+
+        let item = NaviolaPinnedItem(type: .album, title: "Artist - Album", subsonicId: "abc123", coverArtId: "art-1")
+        store.add(item)
+        XCTAssertEqual(store.items.count, 1)
+        XCTAssertTrue(store.isPinned(subsonicId: "abc123"))
+        XCTAssertFalse(store.isPinned(subsonicId: "xyz999"))
+
+        // Duplicate add should be ignored
+        store.add(item)
+        XCTAssertEqual(store.items.count, 1)
+
+        store.remove(subsonicId: "abc123")
+        XCTAssertEqual(store.items.count, 0)
+        XCTAssertFalse(store.isPinned(subsonicId: "abc123"))
+    }
+
+    func testPinnedItemStorePersistence() throws {
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_pinned_\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        let store1 = NaviolaPinnedItemStore(fileURL: tempURL)
+        store1.add(NaviolaPinnedItem(type: .album, title: "Album One", subsonicId: "id-1"))
+        store1.add(NaviolaPinnedItem(type: .track, title: "Track Two", subsonicId: "id-2"))
+        XCTAssertEqual(store1.items.count, 2)
+
+        // Load from same file in a new store instance
+        let store2 = NaviolaPinnedItemStore(fileURL: tempURL)
+        XCTAssertEqual(store2.items.count, 2)
+        XCTAssertEqual(store2.items[0].title, "Album One")
+        XCTAssertEqual(store2.items[0].type, .album)
+        XCTAssertEqual(store2.items[1].title, "Track Two")
+        XCTAssertEqual(store2.items[1].type, .track)
+        XCTAssertTrue(store2.isPinned(subsonicId: "id-1"))
+    }
 }

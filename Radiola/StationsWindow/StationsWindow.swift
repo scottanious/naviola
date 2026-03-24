@@ -588,12 +588,36 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
      *
      * ****************************************/
     @objc func doubleClickRow(sender: AnyObject) {
-        guard let station = stationsTree.item(atRow: stationsTree.clickedRow) as? Station else { return }
+        let clickedItem = stationsTree.item(atRow: stationsTree.clickedRow)
 
-        if player.station?.id == station.id && player.isPlaying {
+        // Naviola: double-click a track in an album → load album into play queue
+        if let track = clickedItem as? NavidromeTrack {
+            if player.station?.id == track.id && player.isPlaying { return }
+
+            // Find parent album and start queue from this track
+            if let album = stationsTree.parent(forItem: track) as? NavidromeAlbum,
+               !album.tracks.isEmpty,
+               let trackIndex = album.tracks.firstIndex(where: { $0.id == track.id }) {
+                NaviolaPlayQueue.shared.playTracks(album.tracks, startingAt: trackIndex)
+            } else {
+                player.station = track
+                player.play()
+            }
             return
         }
 
+        // Naviola: double-click an album → load full album into queue from track 1
+        if let album = clickedItem as? NavidromeAlbum {
+            if album.tracksLoaded && !album.tracks.isEmpty {
+                NaviolaPlayQueue.shared.playTracks(album.tracks)
+            }
+            return
+        }
+
+        // Default: play single station (upstream behavior)
+        guard let station = clickedItem as? Station else { return }
+        if player.station?.id == station.id && player.isPlaying { return }
+        NaviolaPlayQueue.shared.stop()
         player.station = station
         player.play()
     }

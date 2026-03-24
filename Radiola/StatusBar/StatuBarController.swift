@@ -196,6 +196,9 @@ class StatusBarController: NSObject, NSMenuDelegate {
             case .submenu: buildSubmenuFavoritesMenu(menu: menu)
         }
 
+        // Naviola: Pinned items from Navidrome
+        NaviolaMenuBuilder.addPinnedItems(to: menu)
+
         if settings.showCopyToClipboardInMenu {
             menu.addItem(NSMenuItem.separator())
 
