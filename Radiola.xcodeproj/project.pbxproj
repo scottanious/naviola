@@ -97,6 +97,7 @@
 		AA0001012F40B00100000002 /* NavidromeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000001 /* NavidromeModels.swift */; };
 		AA0001012F40B00100000004 /* NavidromeAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000003 /* NavidromeAuth.swift */; };
 		AA0001012F40B00100000006 /* NavidromeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000005 /* NavidromeClient.swift */; };
+		DD0001012F40E00100000002 /* NavidromeCoverArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0001012F40E00100000001 /* NavidromeCoverArt.swift */; };
 		AA0001012F40B00100000008 /* TestNavidrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000007 /* TestNavidrome.swift */; };
 		AAAA00012024120600000001 /* HistoryDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000002 /* HistoryDelegate.swift */; };
 		AAAA00012024120600000003 /* HistoryToolBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000004 /* HistoryToolBox.swift */; };
@@ -215,6 +216,7 @@
 		AA0001012F40B00100000001 /* NavidromeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeModels.swift; sourceTree = "<group>"; };
 		AA0001012F40B00100000003 /* NavidromeAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeAuth.swift; sourceTree = "<group>"; };
 		AA0001012F40B00100000005 /* NavidromeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeClient.swift; sourceTree = "<group>"; };
+		DD0001012F40E00100000001 /* NavidromeCoverArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeCoverArt.swift; sourceTree = "<group>"; };
 		AA0001012F40B00100000007 /* TestNavidrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestNavidrome.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000002 /* HistoryDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDelegate.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000004 /* HistoryToolBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryToolBox.swift; sourceTree = "<group>"; };
@@ -479,6 +481,7 @@
 				AA0001012F40B00100000001 /* NavidromeModels.swift */,
 				AA0001012F40B00100000003 /* NavidromeAuth.swift */,
 				AA0001012F40B00100000005 /* NavidromeClient.swift */,
+				DD0001012F40E00100000001 /* NavidromeCoverArt.swift */,
 			);
 			path = Navidrome;
 			sourceTree = "<group>";
@@ -699,6 +702,7 @@
 				AA0001012F40B00100000002 /* NavidromeModels.swift in Sources */,
 				AA0001012F40B00100000004 /* NavidromeAuth.swift in Sources */,
 				AA0001012F40B00100000006 /* NavidromeClient.swift in Sources */,
+				DD0001012F40E00100000002 /* NavidromeCoverArt.swift in Sources */,
 				BB0001012F40C00100000002 /* NaviolaSettings.swift in Sources */,
 				BB0001012F40C00100000004 /* NavidromePage.swift in Sources */,
 				CC0001012F40D00100000002 /* NavidromeProvider.swift in Sources */,

@@ -47,7 +47,7 @@ extension NavidromeStationDelegate: NSOutlineViewDelegate {
 
     func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
         if item is NavidromeAlbum {
-            return CGFloat(44.0)
+            return CGFloat(48.0)
         }
         return CGFloat(28.0)
     }

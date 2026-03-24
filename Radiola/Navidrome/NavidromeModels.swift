@@ -117,6 +117,29 @@ struct SubsonicAlbumList2Response: Decodable {
     }
 }
 
+// MARK: - search3 Response
+
+struct SubsonicSearch3Response: Decodable {
+    let response: SubsonicSearch3Inner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicSearch3Inner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let searchResult3: SubsonicSearchResult3?
+
+        var isOk: Bool { status == "ok" }
+    }
+
+    struct SubsonicSearchResult3: Decodable {
+        let album: [SubsonicAlbumID3]?
+    }
+}
+
 // MARK: - getAlbum Response
 
 struct SubsonicGetAlbumResponse: Decodable {

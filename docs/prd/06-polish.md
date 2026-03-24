@@ -46,7 +46,7 @@ Until this task is done, the app shows "Radiola" in some upstream UI surfaces. T
 Phases 0-5 complete.
 
 ## Status
-- [ ] 6.1 Cover art
-- [ ] 6.2 Search lens
-- [ ] 6.3 Error states
+- [x] 6.1 Cover art
+- [x] 6.2 Search lens
+- [x] 6.3 Error states
 - [ ] 6.4 Branding (hard-fork trigger — deferred)

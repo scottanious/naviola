@@ -13,10 +13,13 @@ import Cocoa
 class NavidromeAlbumRow: NSView {
     private let album: NavidromeAlbum
 
+    private let coverImageView = NSImageView()
     private let nameLabel = TextField()
     private let detailLabel = Label()
     private let pinButton = ImageButton()
     private let separator = Separator()
+
+    private static let placeholderImage = NSImage(systemSymbolName: "music.note", accessibilityDescription: "Album")
 
     private let pinIcons = [
         false: NSImage(systemSymbolName: NSImage.Name("pin"), accessibilityDescription: "Pin album")?.tint(color: .lightGray),
@@ -27,10 +30,23 @@ class NavidromeAlbumRow: NSView {
         self.album = album
         super.init(frame: NSRect())
 
+        addSubview(coverImageView)
         addSubview(nameLabel)
         addSubview(detailLabel)
         addSubview(pinButton)
         addSubview(separator)
+
+        // Cover art
+        coverImageView.image = Self.placeholderImage
+        coverImageView.imageScaling = .scaleProportionallyUpOrDown
+        coverImageView.wantsLayer = true
+        coverImageView.layer?.cornerRadius = 3
+
+        NavidromeCoverArtCache.shared.image(forCoverArtId: album.coverArtId, size: 80) { [weak self] image in
+            if let image = image {
+                self?.coverImageView.image = image
+            }
+        }
 
         // Name
         nameLabel.isBordered = false
@@ -51,14 +67,22 @@ class NavidromeAlbumRow: NSView {
         pinButton.action = #selector(pinButtonClicked)
         refreshPinButton()
 
+        coverImageView.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         detailLabel.translatesAutoresizingMaskIntoConstraints = false
         pinButton.translatesAutoresizingMaskIntoConstraints = false
 
+        let artSize: CGFloat = 36
+
         NSLayoutConstraint.activate([
-            nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
+            coverImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
+            coverImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            coverImageView.widthAnchor.constraint(equalToConstant: artSize),
+            coverImageView.heightAnchor.constraint(equalToConstant: artSize),
+
+            nameLabel.leadingAnchor.constraint(equalTo: coverImageView.trailingAnchor, constant: 8),
             nameLabel.trailingAnchor.constraint(equalTo: pinButton.leadingAnchor, constant: -8),
-            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 5),
 
             detailLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             detailLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),

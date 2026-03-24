@@ -40,8 +40,8 @@ class NavidromeProvider: ObservableObject {
         case .recentlyAdded:
             return try await client.getAlbumList2(type: "newest", size: 50)
         case .search:
-            // Search will be implemented in Phase 6
-            return []
+            guard !searchText.isEmpty else { return [] }
+            return try await client.search3(query: searchText, albumCount: 50)
         }
     }
 }

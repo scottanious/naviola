@@ -92,6 +92,24 @@ struct NavidromeClient {
         return album
     }
 
+    /// Search for albums by query string.
+    func search3(query: String, albumCount: Int = 20) async throws -> [SubsonicAlbumID3] {
+        let queryItems = [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "albumCount", value: String(albumCount)),
+            URLQueryItem(name: "songCount", value: "0"),
+            URLQueryItem(name: "artistCount", value: "0"),
+        ]
+
+        let response = try await fetch(SubsonicSearch3Response.self, path: "/rest/search3.view", queryItems: queryItems)
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        return response.response.searchResult3?.album ?? []
+    }
+
     // MARK: - URL Builders (no network call)
 
     /// Build a streaming URL for a song. This URL can be passed directly to Player.

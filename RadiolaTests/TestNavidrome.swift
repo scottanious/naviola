@@ -88,6 +88,18 @@ final class TestNavidrome: XCTestCase {
         XCTAssertEqual(songs[2].title, "God You Are")
     }
 
+    func testDecodeSearch3() throws {
+        let data = try loadFixture("search3.json")
+        let response = try JSONDecoder().decode(SubsonicSearch3Response.self, from: data)
+
+        XCTAssertTrue(response.response.isOk)
+        let albums = response.response.searchResult3?.album ?? []
+        XCTAssertEqual(albums.count, 1)
+        XCTAssertEqual(albums[0].id, "album-search-001")
+        XCTAssertEqual(albums[0].name, "By Surprise")
+        XCTAssertEqual(albums[0].artist, "Joy Williams")
+    }
+
     // MARK: - NavidromeAuth Tests
 
     func testMd5Hash() {

@@ -483,14 +483,24 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
 
         self.searchPanel = searchPanel
 
-        // Auto-fetch if not yet loaded
-        if list.state == .notLoaded && list.provider.canFetch() {
+        // Auto-fetch if not yet loaded, or show "not configured"
+        if !NaviolaSettings.shared.isConfigured {
+            updateNavidromeStateIndicator(state: .notLoaded, notConfigured: true)
+        } else if list.state == .notLoaded && list.provider.canFetch() {
             navidromeStationsDelegate.search()
         }
     }
 
     // Naviola: State indicator for Navidrome lists
-    private func updateNavidromeStateIndicator(state: NavidromeAlbumList.State) {
+    private func updateNavidromeStateIndicator(state: NavidromeAlbumList.State, notConfigured: Bool = false) {
+        if notConfigured {
+            stateIndicatorText.stringValue = NSLocalizedString("Navidrome not configured — open Settings to connect", comment: "Navidrome placeholder")
+            stateIndicator.isHidden = false
+            stateIndicatorSpinner.stopAnimation(nil)
+            stateIndicatorSpinner.isHidden = true
+            return
+        }
+
         guard
             let delegate = stationsTree.delegate as? NavidromeStationDelegate,
             let list = delegate.list
@@ -527,6 +537,11 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             stateIndicatorSpinner.stopAnimation(nil)
             stateIndicator.isHidden = true
         }
+    }
+
+    // Sink adapter for Combine publisher (no notConfigured flag)
+    private func updateNavidromeStateIndicator(state: NavidromeAlbumList.State) {
+        updateNavidromeStateIndicator(state: state, notConfigured: false)
     }
 
     /* ****************************************

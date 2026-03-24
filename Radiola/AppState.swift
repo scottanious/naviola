@@ -81,6 +81,7 @@ class AppState: ObservableObject {
     // Naviola: Navidrome album browsing lists
     @Published var navidromeStations: [NavidromeAlbumList] = [
         NavidromeAlbumList(title: NSLocalizedString("Recently Added", comment: "Navidrome station list"), icon: "music.note.list", provider: NavidromeProvider(.recentlyAdded)),
+        NavidromeAlbumList(title: NSLocalizedString("Search", comment: "Navidrome station list"), icon: "magnifyingglass", provider: NavidromeProvider(.search)),
     ]
 
     public var history = History()
