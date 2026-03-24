@@ -205,6 +205,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
      *
      * ****************************************/
     @objc func togglePlay(_ sender: NSMenuItem?) {
+        // Naviola: tell play queue this is a user-initiated pause
+        if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
         player.toggle()
     }
 

@@ -128,6 +128,7 @@ class MediaKeysController: NSObject {
      * ****************************************/
     @objc private func stop(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         if needHandleMediaKey() {
+            NaviolaPlayQueue.shared.userPause()
             player.stop()
         }
         return .success
@@ -138,6 +139,7 @@ class MediaKeysController: NSObject {
      * ****************************************/
     @objc private func toggle(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         if needHandleMediaKey() {
+            if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
             player.toggle()
         }
         return .success

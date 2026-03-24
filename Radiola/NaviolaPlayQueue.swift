@@ -42,9 +42,11 @@ class NaviolaPlayQueue: ObservableObject {
     /// from treating the intermediate stop() as a track-end event.
     private var isChangingTrack = false
 
-    /// When the current track started playing — used to determine if a track
-    /// ended naturally (elapsed ≈ duration) vs user paused mid-track.
+    /// When the current track started playing.
     private(set) var trackStartTime: Date?
+
+    /// Set by userPause() to prevent auto-advance when user explicitly pauses.
+    private var userDidPause = false
 
     init() {
         NotificationCenter.default.addObserver(
@@ -64,6 +66,7 @@ class NaviolaPlayQueue: ObservableObject {
         self.tracks = tracks
         self.currentIndex = index
         isChangingTrack = true
+        userDidPause = false
         trackStartTime = nil
 
         player.station = tracks[index]
@@ -82,7 +85,6 @@ class NaviolaPlayQueue: ObservableObject {
                     let tracks = (albumDetail.song ?? []).map { NavidromeTrack(from: $0, client: client) }
                     playTracks(tracks)
                 default:
-                    // Future: resolve artists, genres, playlists, etc.
                     break
                 }
             } catch {
@@ -91,10 +93,18 @@ class NaviolaPlayQueue: ObservableObject {
         }
     }
 
+    /// Call this when the user explicitly pauses/stops playback.
+    /// Prevents auto-advance from firing.
+    func userPause() {
+        userDidPause = true
+    }
+
     /// Advance to the next track. Returns false if at end (and not repeating).
     @discardableResult
     func next() -> Bool {
         guard isActive else { return false }
+
+        userDidPause = false
 
         // Repeat one: replay the same track
         if repeatMode == .one {
@@ -141,6 +151,7 @@ class NaviolaPlayQueue: ObservableObject {
     func previous() -> Bool {
         guard isActive, currentIndex > 0 else { return false }
 
+        userDidPause = false
         currentIndex -= 1
         isChangingTrack = true
         trackStartTime = nil
@@ -155,6 +166,7 @@ class NaviolaPlayQueue: ObservableObject {
         currentIndex = -1
         isChangingTrack = false
         trackStartTime = nil
+        userDidPause = false
     }
 
     // MARK: - Auto-Advance
@@ -162,60 +174,36 @@ class NaviolaPlayQueue: ObservableObject {
     @objc private func playerStatusChanged() {
         switch player.status {
         case .playing:
-            // Track started playing — clear the changing flag, record start time
             isChangingTrack = false
             trackStartTime = Date()
+            userDidPause = false
 
         case .connecting:
             break
 
         case .paused:
-            // Ignore if we're in the middle of a track switch (play() calls stop() internally)
+            // Ignore if we're in the middle of a track switch
             guard !isChangingTrack else { return }
 
             // Nothing to advance if queue isn't active
             guard isActive else { return }
 
+            // User explicitly paused — don't advance
+            if userDidPause {
+                userDidPause = false
+                return
+            }
+
             // Verify this is still our track
             guard let current = currentTrack, player.station?.id == current.id else {
-                // User switched to a different station — clear queue
                 stop()
                 return
             }
 
-            // Determine if the track ended naturally vs user paused.
-            //
-            // Heuristic: if the track played for at least 80% of its reported duration
-            // (or at least 10 seconds if no duration), treat as natural end → advance.
-            // Short plays (< min threshold) are user pauses → stop queue.
-            //
-            // The 80% threshold accounts for: encoding differences, buffering,
-            // Navidrome reporting slightly different durations than actual audio.
-            let minPlaySeconds: TimeInterval = 10.0
-
-            if let startTime = trackStartTime {
-                let elapsed = Date().timeIntervalSince(startTime)
-
-                let isNaturalEnd: Bool
-                if let duration = current.duration, duration > 0 {
-                    let trackDuration = Double(duration)
-                    isNaturalEnd = elapsed >= trackDuration * 0.8
-                } else {
-                    // No duration info — use minimum play time as fallback
-                    isNaturalEnd = elapsed >= minPlaySeconds
-                }
-
-                if isNaturalEnd {
-                    trackStartTime = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                        self?.next()
-                    }
-                } else {
-                    // User paused mid-track — stop the queue
-                    stop()
-                }
-            } else {
-                stop()
+            // Track ended — advance after a brief delay for FFPlayer cleanup
+            trackStartTime = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.next()
             }
         }
     }

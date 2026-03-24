@@ -182,6 +182,8 @@ class ToolbarPlayView: NSViewController {
      *
      * ****************************************/
     @objc private func togglePlay() {
+        // Naviola: tell play queue this is a user-initiated pause
+        if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
         player.toggle()
     }
 

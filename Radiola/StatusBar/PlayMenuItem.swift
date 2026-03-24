@@ -143,6 +143,8 @@ fileprivate class PlayItemView: NSView {
      *
      * ****************************************/
     @objc func toggle() {
+        // Naviola: tell play queue this is a user-initiated pause
+        if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
         player.toggle()
         menuItem?.menu?.cancelTracking()
     }
