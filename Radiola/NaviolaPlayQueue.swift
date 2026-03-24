@@ -22,7 +22,13 @@ class NaviolaPlayQueue: ObservableObject {
         return tracks[currentIndex]
     }
 
-    private var wasPlaying = false
+    /// Set when we're intentionally switching tracks — prevents the observer
+    /// from treating the intermediate stop() as a track-end event.
+    private var isChangingTrack = false
+
+    /// When the current track started playing — used to determine if a track
+    /// ended naturally (elapsed ≈ duration) vs user paused mid-track.
+    private var trackStartTime: Date?
 
     init() {
         NotificationCenter.default.addObserver(
@@ -41,7 +47,8 @@ class NaviolaPlayQueue: ObservableObject {
 
         self.tracks = tracks
         self.currentIndex = index
-        self.wasPlaying = true
+        isChangingTrack = true
+        trackStartTime = nil
 
         player.station = tracks[index]
         player.play()
@@ -77,6 +84,8 @@ class NaviolaPlayQueue: ObservableObject {
         }
 
         currentIndex += 1
+        isChangingTrack = true
+        trackStartTime = nil
         player.station = tracks[currentIndex]
         player.play()
         return true
@@ -86,29 +95,59 @@ class NaviolaPlayQueue: ObservableObject {
     func stop() {
         tracks = []
         currentIndex = -1
-        wasPlaying = false
+        isChangingTrack = false
+        trackStartTime = nil
     }
 
     // MARK: - Auto-Advance
 
     @objc private func playerStatusChanged() {
-        if player.status == .playing {
-            wasPlaying = true
-            return
-        }
+        switch player.status {
+        case .playing:
+            // Track started playing — clear the changing flag, record start time
+            isChangingTrack = false
+            trackStartTime = Date()
 
-        // When player transitions to paused and we were playing, try to advance
-        if player.status == .paused && wasPlaying && isActive {
-            wasPlaying = false
+        case .connecting:
+            break
 
-            // Check if the paused station matches our current queue track
-            // (avoids advancing if user switched to a different station)
-            if let currentTrack = currentTrack,
-               player.station?.id == currentTrack.id {
-                // Small delay to let FFPlayer fully clean up before starting next track
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                    self?.next()
+        case .paused:
+            // Ignore if we're in the middle of a track switch (play() calls stop() internally)
+            guard !isChangingTrack else { return }
+
+            // Nothing to advance if queue isn't active
+            guard isActive else { return }
+
+            // Verify this is still our track
+            guard let current = currentTrack, player.station?.id == current.id else {
+                // User switched to a different station — clear queue
+                stop()
+                return
+            }
+
+            // Determine if the track ended naturally by comparing elapsed time to duration.
+            // If elapsed >= (duration - tolerance), the track played through → advance.
+            // Otherwise, the user paused mid-track → stop the queue.
+            let tolerance: TimeInterval = 5.0
+            if let startTime = trackStartTime,
+               let duration = current.duration,
+               duration > 0 {
+                let elapsed = Date().timeIntervalSince(startTime)
+                let trackDuration = Double(duration)
+
+                if elapsed >= trackDuration - tolerance {
+                    // Track ended naturally — advance after a brief cleanup delay
+                    trackStartTime = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                        self?.next()
+                    }
+                } else {
+                    // User paused mid-track — stop the queue
+                    stop()
                 }
+            } else {
+                // No duration info or start time — can't determine, stop queue
+                stop()
             }
         }
     }
