@@ -100,22 +100,29 @@ class ToolbarPlayView: NSViewController {
         nextButton.target = self
         nextButton.action = #selector(nextTrack)
 
-        // Place between playButton and songLabel: [play] [<<] [>>] [song info...]
         NSLayoutConstraint.activate([
             prevButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
-            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 12),
+            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 8),
             prevButton.widthAnchor.constraint(equalToConstant: 14),
             prevButton.heightAnchor.constraint(equalToConstant: 14),
 
             nextButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
-            nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 8),
+            nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 6),
             nextButton.widthAnchor.constraint(equalToConstant: 14),
             nextButton.heightAnchor.constraint(equalToConstant: 14),
         ])
 
-        // Re-anchor songLabel to start after the skip buttons when visible.
-        // The XIB anchors songLabel to playButton, but we need dynamic leading.
-        // We'll handle this in refresh() by adjusting the label's leading.
+        // Override XIB constraints: labels must start after skip buttons, not after playButton.
+        // Find and deactivate the XIB's leading constraints on songLabel and stationLabel.
+        for constraint in view.constraints {
+            if constraint.identifier == "gef-ca-Bb6" || constraint.identifier == "xzb-JE-Bg0" {
+                constraint.isActive = false
+            }
+        }
+
+        // Re-anchor labels after the skip buttons
+        songLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 8).isActive = true
+        stationLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 8).isActive = true
     }
 
     /* ****************************************
