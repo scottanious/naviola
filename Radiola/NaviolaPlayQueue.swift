@@ -15,6 +15,22 @@ class NaviolaPlayQueue: ObservableObject {
     @Published var tracks: [NavidromeTrack] = []
     @Published var currentIndex: Int = -1
 
+    enum RepeatMode: Int {
+        case off = 0
+        case all = 1
+        case one = 2
+    }
+
+    var repeatMode: RepeatMode {
+        get { RepeatMode(rawValue: UserDefaults.standard.integer(forKey: "NaviolaRepeatMode")) ?? .off }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: "NaviolaRepeatMode") }
+    }
+
+    var shuffleEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: "NaviolaShuffleEnabled") }
+        set { UserDefaults.standard.set(newValue, forKey: "NaviolaShuffleEnabled") }
+    }
+
     var isActive: Bool { !tracks.isEmpty && currentIndex >= 0 }
 
     var currentTrack: NavidromeTrack? {
@@ -75,15 +91,57 @@ class NaviolaPlayQueue: ObservableObject {
         }
     }
 
-    /// Advance to the next track. Returns false if at end.
+    /// Advance to the next track. Returns false if at end (and not repeating).
     @discardableResult
     func next() -> Bool {
-        guard isActive, currentIndex + 1 < tracks.count else {
+        guard isActive else { return false }
+
+        // Repeat one: replay the same track
+        if repeatMode == .one {
+            isChangingTrack = true
+            trackStartTime = nil
+            player.station = tracks[currentIndex]
+            player.play()
+            return true
+        }
+
+        // Shuffle: pick a random different track
+        if shuffleEnabled && tracks.count > 1 {
+            var nextIndex = currentIndex
+            while nextIndex == currentIndex {
+                nextIndex = Int.random(in: 0 ..< tracks.count)
+            }
+            currentIndex = nextIndex
+            isChangingTrack = true
+            trackStartTime = nil
+            player.station = tracks[currentIndex]
+            player.play()
+            return true
+        }
+
+        // Sequential: advance or loop
+        if currentIndex + 1 < tracks.count {
+            currentIndex += 1
+        } else if repeatMode == .all {
+            currentIndex = 0
+        } else {
             stop()
             return false
         }
 
-        currentIndex += 1
+        isChangingTrack = true
+        trackStartTime = nil
+        player.station = tracks[currentIndex]
+        player.play()
+        return true
+    }
+
+    /// Go to the previous track. Returns false if at start.
+    @discardableResult
+    func previous() -> Bool {
+        guard isActive, currentIndex > 0 else { return false }
+
+        currentIndex -= 1
         isChangingTrack = true
         trackStartTime = nil
         player.station = tracks[currentIndex]

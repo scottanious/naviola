@@ -181,8 +181,18 @@ fileprivate class PlayItemView: NSView {
             case Player.Status.playing:
                 playIcon.image = NSImage(systemSymbolName: NSImage.Name("pause.fill"), accessibilityDescription: "Pause")
                 playIcon.image?.isTemplate = true
-                stationLabel.stringValue = player.stationName
-                songLabel.stringValue = player.songTitle
+
+                // Naviola: show structured metadata for Navidrome tracks
+                if let track = player.station as? NavidromeTrack {
+                    songLabel.stringValue = track.title
+                    var detail = [String]()
+                    if let artist = track.artist { detail.append(artist) }
+                    if let album = track.albumTitle { detail.append(album) }
+                    stationLabel.stringValue = detail.joined(separator: " — ")
+                } else {
+                    stationLabel.stringValue = player.stationName
+                    songLabel.stringValue = player.songTitle
+                }
         }
 
         onlyStationLabel.stringValue = stationLabel.stringValue

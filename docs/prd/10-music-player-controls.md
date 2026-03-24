@@ -96,9 +96,9 @@ The existing "Show song in status bar" setting (`settings.showSongInStatusBar`) 
 Phase 8 (play queue must exist for skip/back/repeat/shuffle).
 
 ## Status
-- [ ] 10.1 Surface NavidromeTrack metadata to Player
-- [ ] 10.2 Rich metadata in menu bar dropdown
-- [ ] 10.3 Skip/back controls
-- [ ] 10.4 Player controls on main window
-- [ ] 10.5 Repeat/shuffle toggle
-- [ ] 10.6 Song title in menu bar verification
+- [x] 10.1 Surface NavidromeTrack metadata to Player
+- [x] 10.2 Rich metadata in menu bar dropdown
+- [x] 10.3 Skip/back controls (menu, toolbar, media keys)
+- [x] 10.4 Player controls on main window (skip/back buttons + rich metadata)
+- [x] 10.5 Repeat/shuffle toggle (persisted in UserDefaults)
+- [x] 10.6 Song title in menu bar (works via NaviolaPlayerMetadata)

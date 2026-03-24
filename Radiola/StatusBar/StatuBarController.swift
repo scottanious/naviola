@@ -169,6 +169,9 @@ class StatusBarController: NSObject, NSMenuDelegate {
         playItem.isEnabled = true
         menu.addItem(playItem)
 
+        // Naviola: Skip/back and repeat/shuffle controls when play queue is active
+        NaviolaPlaybackMenu.addPlaybackControls(to: menu)
+
         if settings.showVolumeInMenu {
             menu.addItem(NSMenuItem.separator())
             menu.addItem(NSMenuItem(title: NSLocalizedString("Volume", comment: "Status bar menu item"), action: nil, keyEquivalent: ""))

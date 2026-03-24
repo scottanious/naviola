@@ -147,8 +147,13 @@ class MediaKeysController: NSObject {
      *
      * ****************************************/
     @objc private func previous(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        if needHandleMediaKey() && settings.mediaPrevNextKeyAction == .switchStation {
-            switchStation(offset: -1)
+        if needHandleMediaKey() {
+            // Naviola: use play queue if active, otherwise fall back to station switching
+            if NaviolaPlayQueue.shared.isActive {
+                NaviolaPlayQueue.shared.previous()
+            } else if settings.mediaPrevNextKeyAction == .switchStation {
+                switchStation(offset: -1)
+            }
         }
         return .success
     }
@@ -157,8 +162,13 @@ class MediaKeysController: NSObject {
      *
      * ****************************************/
     @objc private func next(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        if needHandleMediaKey() && settings.mediaPrevNextKeyAction == .switchStation {
-            switchStation(offset: 1)
+        if needHandleMediaKey() {
+            // Naviola: use play queue if active, otherwise fall back to station switching
+            if NaviolaPlayQueue.shared.isActive {
+                NaviolaPlayQueue.shared.next()
+            } else if settings.mediaPrevNextKeyAction == .switchStation {
+                switchStation(offset: 1)
+            }
         }
         return .success
     }

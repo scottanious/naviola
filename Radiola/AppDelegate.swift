@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let oplFileName = "bookmarks.opml"
     private let audioSytstem = AudioSytstem()
     private let mediaKeys = MediaKeysController()
+    private let naviolaMetadata = NaviolaPlayerMetadata.shared
     private let mainMenuDelegate = MainMenuDelegate()
 
     @IBOutlet var pauseMenuItem: NSMenuItem!

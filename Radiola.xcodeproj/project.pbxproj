@@ -104,6 +104,8 @@
 		AAAA00012024120600000006 /* HistorySearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000007 /* HistorySearchPanel.swift */; };
 		AAAA00012024120600000008 /* LocalStationSearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000009 /* LocalStationSearchPanel.swift */; };
 		BB0001012F40C00100000002 /* NaviolaSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001012F40C00100000001 /* NaviolaSettings.swift */; };
+		EE0001013B60B00100000002 /* NaviolaPlayerMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001013B60B00100000001 /* NaviolaPlayerMetadata.swift */; };
+		EE0001013B60B00100000004 /* NaviolaPlaybackMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001013B60B00100000003 /* NaviolaPlaybackMenu.swift */; };
 		DD0002013A50A00100000002 /* NaviolaPinnedItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */; };
 		DD0002013A50A00100000004 /* NaviolaPlayQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */; };
 		DD0002013A50A00100000006 /* NaviolaMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */; };
@@ -226,6 +228,8 @@
 		AAAA00012024120600000007 /* HistorySearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistorySearchPanel.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000009 /* LocalStationSearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStationSearchPanel.swift; sourceTree = "<group>"; };
 		BB0001012F40C00100000001 /* NaviolaSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaSettings.swift; sourceTree = "<group>"; };
+		EE0001013B60B00100000001 /* NaviolaPlayerMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPlayerMetadata.swift; sourceTree = "<group>"; };
+		EE0001013B60B00100000003 /* NaviolaPlaybackMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPlaybackMenu.swift; sourceTree = "<group>"; };
 		DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPinnedItems.swift; sourceTree = "<group>"; };
 		DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaPlayQueue.swift; sourceTree = "<group>"; };
 		DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaMenuBuilder.swift; sourceTree = "<group>"; };
@@ -350,6 +354,7 @@
 				394F8A56287394F1005EA7FA /* Notifications.swift */,
 				39D79E622933BEAB00210D94 /* Settings.swift */,
 				BB0001012F40C00100000001 /* NaviolaSettings.swift */,
+				EE0001013B60B00100000001 /* NaviolaPlayerMetadata.swift */,
 				DD0002013A50A00100000001 /* NaviolaPinnedItems.swift */,
 				DD0002013A50A00100000003 /* NaviolaPlayQueue.swift */,
 				39E8DFD62890839500082467 /* Updater.swift */,
@@ -480,6 +485,7 @@
 				39EF8B9D2BCC151A00733571 /* PlayMenuItem.swift */,
 				39E042CE293B3AC900A2167E /* VolumeMenuItem.swift */,
 				DD0002013A50A00100000005 /* NaviolaMenuBuilder.swift */,
+				EE0001013B60B00100000003 /* NaviolaPlaybackMenu.swift */,
 			);
 			path = StatusBar;
 			sourceTree = "<group>";
@@ -722,6 +728,8 @@
 				DD0002013A50A00100000002 /* NaviolaPinnedItems.swift in Sources */,
 				DD0002013A50A00100000004 /* NaviolaPlayQueue.swift in Sources */,
 				DD0002013A50A00100000006 /* NaviolaMenuBuilder.swift in Sources */,
+				EE0001013B60B00100000002 /* NaviolaPlayerMetadata.swift in Sources */,
+				EE0001013B60B00100000004 /* NaviolaPlaybackMenu.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

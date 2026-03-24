@@ -13,6 +13,10 @@ class ToolbarPlayView: NSViewController {
     @IBOutlet var stationLabel: NSTextField!
     private let onlyStationLabel = Label()
 
+    // Naviola: skip/back buttons
+    private let prevButton = NSButton()
+    private let nextButton = NSButton()
+
     /* ****************************************
      *
      * ****************************************/
@@ -58,6 +62,9 @@ class ToolbarPlayView: NSViewController {
         playButton.keyEquivalent = " "
         playButton.keyEquivalentModifierMask = []
 
+        // Naviola: skip/back buttons
+        setupSkipButtons()
+
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(refresh),
                                                name: Notification.Name.PlayerStatusChanged,
@@ -69,6 +76,39 @@ class ToolbarPlayView: NSViewController {
                                                object: nil)
 
         refresh()
+    }
+
+    // Naviola: set up skip/back buttons
+    private func setupSkipButtons() {
+        for btn in [prevButton, nextButton] {
+            view.addSubview(btn)
+            btn.bezelStyle = NSButton.BezelStyle.regularSquare
+            btn.setButtonType(NSButton.ButtonType.momentaryPushIn)
+            btn.imagePosition = NSControl.ImagePosition.imageOnly
+            btn.isBordered = false
+            btn.imageScaling = NSImageScaling.scaleNone
+            btn.translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        prevButton.image = NSImage(systemSymbolName: "backward.fill", accessibilityDescription: "Previous")
+        prevButton.target = self
+        prevButton.action = #selector(previousTrack)
+
+        nextButton.image = NSImage(systemSymbolName: "forward.fill", accessibilityDescription: "Next")
+        nextButton.target = self
+        nextButton.action = #selector(nextTrack)
+
+        NSLayoutConstraint.activate([
+            prevButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            prevButton.trailingAnchor.constraint(equalTo: playButton.leadingAnchor, constant: -4),
+            prevButton.widthAnchor.constraint(equalToConstant: 20),
+            prevButton.heightAnchor.constraint(equalToConstant: 20),
+
+            nextButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            nextButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 4),
+            nextButton.widthAnchor.constraint(equalToConstant: 20),
+            nextButton.heightAnchor.constraint(equalToConstant: 20),
+        ])
     }
 
     /* ****************************************
@@ -85,8 +125,17 @@ class ToolbarPlayView: NSViewController {
                 songLabel.stringValue = NSLocalizedString("Connecting…", comment: "Station label text")
 
             case Player.Status.playing:
-                stationLabel.stringValue = player.stationName
-                songLabel.stringValue = player.songTitle
+                // Naviola: show structured metadata for Navidrome tracks
+                if let track = player.station as? NavidromeTrack {
+                    songLabel.stringValue = track.title
+                    var detail = [String]()
+                    if let artist = track.artist { detail.append(artist) }
+                    if let album = track.albumTitle { detail.append(album) }
+                    stationLabel.stringValue = detail.joined(separator: " — ")
+                } else {
+                    stationLabel.stringValue = player.stationName
+                    songLabel.stringValue = player.songTitle
+                }
         }
 
         stationLabel.toolTip = stationLabel.stringValue
@@ -113,6 +162,13 @@ class ToolbarPlayView: NSViewController {
         onlyStationLabel.isVisible = songLabel.stringValue.isEmpty
         songLabel.isVisible = !onlyStationLabel.isVisible
         stationLabel.isVisible = !onlyStationLabel.isVisible
+
+        // Naviola: update skip button state
+        let queue = NaviolaPlayQueue.shared
+        prevButton.isHidden = !queue.isActive
+        nextButton.isHidden = !queue.isActive
+        prevButton.isEnabled = queue.currentIndex > 0
+        nextButton.isEnabled = queue.currentIndex + 1 < queue.tracks.count || queue.repeatMode != .off
     }
 
     /* ****************************************
@@ -120,5 +176,14 @@ class ToolbarPlayView: NSViewController {
      * ****************************************/
     @objc private func togglePlay() {
         player.toggle()
+    }
+
+    // Naviola: skip/back actions
+    @objc private func previousTrack() {
+        NaviolaPlayQueue.shared.previous()
+    }
+
+    @objc private func nextTrack() {
+        NaviolaPlayQueue.shared.next()
     }
 }
