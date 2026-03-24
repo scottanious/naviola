@@ -22,7 +22,7 @@ class NavidromeSearchPanel: NSControl {
         addSubview(separator)
 
         switch provider.lensType {
-        case .recentlyAdded:
+        case .recentlyAdded, .pinned:
             setupRefreshMode()
         case .search:
             setupSearchMode(provider: provider)

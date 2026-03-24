@@ -84,6 +84,9 @@ class AppState: ObservableObject {
         NavidromeAlbumList(title: NSLocalizedString("Search", comment: "Navidrome station list"), icon: "magnifyingglass", provider: NavidromeProvider(.search)),
     ]
 
+    // Naviola: Pinned items list (shows in sidebar under "Pinned")
+    let naviolaPinnedList = NavidromeAlbumList(title: NSLocalizedString("Pinned", comment: "Sidebar item"), icon: "pin.fill", provider: NavidromeProvider(.pinned))
+
     public var history = History()
 
     /* ****************************************

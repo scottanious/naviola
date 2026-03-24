@@ -93,6 +93,10 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
         }
 
+        // Naviola: Pinned items section
+        sideBar.addGroup(title: NSLocalizedString("Pinned", comment: "Sidebar group"))
+        sideBar.addItem(id: appState.naviolaPinnedList.id, title: appState.naviolaPinnedList.title, icon: appState.naviolaPinnedList.icon)
+
         sideBar.addGroup(title: NSLocalizedString("Radio browser", comment: "Sidebar group"))
         for list in appState.internetStations {
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
@@ -338,6 +342,11 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             setFocus(listId: listId, toTree: !list.items.isEmpty)
             updateStateIndicator(state: list.state)
         } else if let list = AppState.shared.navidromeStations.find(byId: listId) {
+            setNavidromeStationList(list: list)
+            setFocus(listId: listId, toTree: !list.items.isEmpty)
+            updateNavidromeStateIndicator(state: list.state)
+        } else if listId == AppState.shared.naviolaPinnedList.id {
+            let list = AppState.shared.naviolaPinnedList
             setNavidromeStationList(list: list)
             setFocus(listId: listId, toTree: !list.items.isEmpty)
             updateNavidromeStateIndicator(state: list.state)
