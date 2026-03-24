@@ -78,6 +78,11 @@ class AppState: ObservableObject {
         InternetStationList(title: NSLocalizedString("By country", comment: "Internet station list"), icon: "globe", provider: RadioBrowserProvider(.byCountry)),
     ]
 
+    // Naviola: Navidrome album browsing lists
+    @Published var navidromeStations: [NavidromeAlbumList] = [
+        NavidromeAlbumList(title: NSLocalizedString("Recently Added", comment: "Navidrome station list"), icon: "music.note.list", provider: NavidromeProvider(.recentlyAdded)),
+    ]
+
     public var history = History()
 
     /* ****************************************

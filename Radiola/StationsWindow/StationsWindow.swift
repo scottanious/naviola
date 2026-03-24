@@ -36,6 +36,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
 
     private var localStationsDelegate: LocalStationDelegate!
     private var internetStationsDelegate: InternetStationDelegate!
+    private var navidromeStationsDelegate: NavidromeStationDelegate!
     private var historyDelegate: HistoryDelegate!
 
     private var toolBox: NSView? { didSet { placeToolbox() } }
@@ -61,6 +62,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
 
         localStationsDelegate = LocalStationDelegate(outlineView: stationsTree)
         internetStationsDelegate = InternetStationDelegate(outlineView: stationsTree)
+        navidromeStationsDelegate = NavidromeStationDelegate(outlineView: stationsTree)
         historyDelegate = HistoryDelegate(outlineView: stationsTree)
 
         stationsTree.style = .inset
@@ -93,6 +95,12 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
 
         sideBar.addGroup(title: NSLocalizedString("Radio browser", comment: "Sidebar group"))
         for list in appState.internetStations {
+            sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
+        }
+
+        // Naviola: Navidrome browsing section
+        sideBar.addGroup(title: NSLocalizedString("Naviola", comment: "Sidebar group"))
+        for list in appState.navidromeStations {
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
         }
 
@@ -329,6 +337,10 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             setInternetStationList(list: list)
             setFocus(listId: listId, toTree: !list.items.isEmpty)
             updateStateIndicator(state: list.state)
+        } else if let list = AppState.shared.navidromeStations.find(byId: listId) {
+            setNavidromeStationList(list: list)
+            setFocus(listId: listId, toTree: !list.items.isEmpty)
+            updateNavidromeStateIndicator(state: list.state)
         }
     }
 
@@ -452,6 +464,69 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         listStateSink = list.$state.sink(receiveValue: updateStateIndicator)
 
         self.searchPanel = searchPanel
+    }
+
+    // Naviola: Set up Navidrome album list view
+    private func setNavidromeStationList(list: NavidromeAlbumList) {
+        stationsTree.delegate = navidromeStationsDelegate
+        stationsTree.dataSource = navidromeStationsDelegate
+        navidromeStationsDelegate.list = list
+
+        stationsTree.reloadItem(nil, reloadChildren: true)
+
+        let searchPanel = NavidromeSearchPanel(provider: list.provider)
+        searchPanel.target = navidromeStationsDelegate
+        searchPanel.action = #selector(navidromeStationsDelegate.search)
+
+        listStateSink?.cancel()
+        listStateSink = list.$state.sink(receiveValue: updateNavidromeStateIndicator)
+
+        self.searchPanel = searchPanel
+
+        // Auto-fetch if not yet loaded
+        if list.state == .notLoaded && list.provider.canFetch() {
+            navidromeStationsDelegate.search()
+        }
+    }
+
+    // Naviola: State indicator for Navidrome lists
+    private func updateNavidromeStateIndicator(state: NavidromeAlbumList.State) {
+        guard
+            let delegate = stationsTree.delegate as? NavidromeStationDelegate,
+            let list = delegate.list
+        else {
+            stateIndicator.isHidden = true
+            stateIndicatorSpinner.stopAnimation(nil)
+            return
+        }
+
+        switch (state, list.items.isEmpty) {
+        case (.notLoaded, _):
+            stateIndicator.isHidden = true
+            stateIndicatorSpinner.stopAnimation(nil)
+
+        case (.loading, _):
+            stateIndicatorText.stringValue = NSLocalizedString("Loading…", comment: "Navidrome placeholder")
+            stateIndicator.isHidden = false
+            stateIndicatorSpinner.isHidden = false
+            stateIndicatorSpinner.startAnimation(nil)
+
+        case (.error, _):
+            stateIndicatorText.stringValue = NSLocalizedString("Connection error", comment: "Navidrome placeholder")
+            stateIndicator.isHidden = false
+            stateIndicatorSpinner.stopAnimation(nil)
+            stateIndicatorSpinner.isHidden = true
+
+        case (.loaded, true):
+            stateIndicatorSpinner.stopAnimation(nil)
+            stateIndicatorSpinner.isHidden = true
+            stateIndicator.isHidden = false
+            stateIndicatorText.stringValue = NSLocalizedString("No results", comment: "Navidrome placeholder")
+
+        case (.loaded, false):
+            stateIndicatorSpinner.stopAnimation(nil)
+            stateIndicator.isHidden = true
+        }
     }
 
     /* ****************************************

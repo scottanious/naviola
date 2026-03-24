@@ -48,6 +48,13 @@ class PreferencesWindow: NSWindowController, NSTabViewDelegate {
         viewController.addTabViewItem(tab)
         tab.viewController?.title = tab.label
 
+        // Naviola: Navidrome settings tab
+        tab = NSTabViewItem(viewController: NavidromePage())
+        tab.label = tab.viewController?.title ?? ""
+        tab.image = NSImage(systemSymbolName: "server.rack", accessibilityDescription: "")
+        viewController.addTabViewItem(tab)
+        tab.viewController?.title = tab.label
+
         viewController.tabStyle = .toolbar
         contentViewController = viewController
     }

@@ -310,6 +310,15 @@
         }
       }
     },
+    "Connected" : {
+      "comment" : "Navidrome test status"
+    },
+    "Connecting..." : {
+      "comment" : "Navidrome test status"
+    },
+    "Connection failed" : {
+      "comment" : "Navidrome test status"
+    },
     "Controls" : {
       "comment" : "Settings page title",
       "localizations" : {
@@ -711,6 +720,9 @@
         }
       }
     },
+    "Navidrome" : {
+      "comment" : "Settings page title"
+    },
     "never" : {
       "comment" : "Settings combobox item",
       "localizations" : {
@@ -798,6 +810,9 @@
         }
       }
     },
+    "Password:" : {
+      "comment" : "Navidrome settings label"
+    },
     "Play last station on startup" : {
       "comment" : "Settings control title",
       "localizations" : {
@@ -826,6 +841,9 @@
           }
         }
       }
+    },
+    "Please fill in all fields" : {
+      "comment" : "Navidrome test status"
     },
     "Press shortcut" : {
       "comment" : "Settings label",
@@ -942,6 +960,9 @@
           }
         }
       }
+    },
+    "Server URL:" : {
+      "comment" : "Navidrome settings label"
     },
     "Show a tooltip with the radiostation and song" : {
       "comment" : "Settings label",
@@ -1292,6 +1313,9 @@
         }
       }
     },
+    "Test Connection" : {
+      "comment" : "Navidrome settings button"
+    },
     "toggles mute" : {
       "comment" : "Settings combobox item",
       "localizations" : {
@@ -1378,6 +1402,9 @@
           }
         }
       }
+    },
+    "Username:" : {
+      "comment" : "Navidrome settings label"
     },
     "When playback starts." : {
       "comment" : "Settings label",

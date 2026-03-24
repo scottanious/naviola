@@ -93,3 +93,9 @@ iOSInjectionProject/
 .DS_Store
 *.pyc
 *.bak
+
+# Credentials / secrets
+.env
+.env.*
+*.credentials
+*.secret

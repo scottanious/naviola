@@ -1,0 +1,37 @@
+{
+    "subsonic-response": {
+        "status": "ok",
+        "version": "1.16.1",
+        "type": "navidrome",
+        "serverVersion": "0.60.3 (34c6f12a)",
+        "openSubsonic": true,
+        "albumList2": {
+            "album": [
+                {
+                    "id": "album-001",
+                    "name": "Where the Joy Is",
+                    "artist": "We Are Messengers",
+                    "artistId": "artist-001",
+                    "coverArt": "al-album-001_cover",
+                    "songCount": 10,
+                    "duration": 1902,
+                    "created": "2026-03-22T07:18:53Z",
+                    "year": 2024,
+                    "genre": "Christian Rock"
+                },
+                {
+                    "id": "album-002",
+                    "name": "Counting My Blessings",
+                    "artist": "Seph Schlueter",
+                    "artistId": "artist-002",
+                    "coverArt": "al-album-002_cover",
+                    "songCount": 27,
+                    "duration": 5947,
+                    "created": "2026-03-22T06:24:40Z",
+                    "year": 2026,
+                    "genre": "Christian"
+                }
+            ]
+        }
+    }
+}

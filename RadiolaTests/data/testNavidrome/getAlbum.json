@@ -1,0 +1,76 @@
+{
+    "subsonic-response": {
+        "status": "ok",
+        "version": "1.16.1",
+        "type": "navidrome",
+        "serverVersion": "0.60.3 (34c6f12a)",
+        "openSubsonic": true,
+        "album": {
+            "id": "album-001",
+            "name": "Where the Joy Is",
+            "artist": "We Are Messengers",
+            "artistId": "artist-001",
+            "coverArt": "al-album-001_cover",
+            "songCount": 3,
+            "duration": 520,
+            "year": 2024,
+            "genre": "Christian Rock",
+            "song": [
+                {
+                    "id": "song-001",
+                    "title": "Keep Your Head Up",
+                    "album": "Where the Joy Is",
+                    "artist": "We Are Messengers",
+                    "track": 1,
+                    "year": 2024,
+                    "genre": "Christian Rock",
+                    "coverArt": "mf-song-001_cover",
+                    "size": 6956220,
+                    "duration": 166,
+                    "bitRate": 320,
+                    "contentType": "audio/mpeg",
+                    "suffix": "mp3",
+                    "discNumber": 1,
+                    "albumId": "album-001",
+                    "artistId": "artist-001"
+                },
+                {
+                    "id": "song-002",
+                    "title": "Come What May",
+                    "album": "Where the Joy Is",
+                    "artist": "We Are Messengers",
+                    "track": 2,
+                    "year": 2024,
+                    "genre": "Christian Rock",
+                    "coverArt": "mf-song-002_cover",
+                    "size": 7234560,
+                    "duration": 178,
+                    "bitRate": 320,
+                    "contentType": "audio/mpeg",
+                    "suffix": "mp3",
+                    "discNumber": 1,
+                    "albumId": "album-001",
+                    "artistId": "artist-001"
+                },
+                {
+                    "id": "song-003",
+                    "title": "God You Are",
+                    "album": "Where the Joy Is",
+                    "artist": "We Are Messengers",
+                    "track": 3,
+                    "year": 2024,
+                    "genre": "Christian Rock",
+                    "coverArt": "mf-song-003_cover",
+                    "size": 5678900,
+                    "duration": 176,
+                    "bitRate": 320,
+                    "contentType": "audio/mpeg",
+                    "suffix": "mp3",
+                    "discNumber": 1,
+                    "albumId": "album-001",
+                    "artistId": "artist-001"
+                }
+            ]
+        }
+    }
+}

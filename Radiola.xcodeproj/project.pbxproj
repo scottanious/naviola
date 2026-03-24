@@ -94,10 +94,21 @@
 		39F869BD288C56C300273AB0 /* UpdatePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39F869BB288C56C300273AB0 /* UpdatePanel.xib */; };
 		39FF07732933A59900751A03 /* StatuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FF07722933A59900751A03 /* StatuBarController.swift */; };
 		9D1D31CA2A06448200F0BA44 /* AdvancedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D1D31C92A06448200F0BA44 /* AdvancedPage.swift */; };
+		AA0001012F40B00100000002 /* NavidromeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000001 /* NavidromeModels.swift */; };
+		AA0001012F40B00100000004 /* NavidromeAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000003 /* NavidromeAuth.swift */; };
+		AA0001012F40B00100000006 /* NavidromeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000005 /* NavidromeClient.swift */; };
+		AA0001012F40B00100000008 /* TestNavidrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001012F40B00100000007 /* TestNavidrome.swift */; };
 		AAAA00012024120600000001 /* HistoryDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000002 /* HistoryDelegate.swift */; };
 		AAAA00012024120600000003 /* HistoryToolBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000004 /* HistoryToolBox.swift */; };
 		AAAA00012024120600000006 /* HistorySearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000007 /* HistorySearchPanel.swift */; };
 		AAAA00012024120600000008 /* LocalStationSearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA00012024120600000009 /* LocalStationSearchPanel.swift */; };
+		BB0001012F40C00100000002 /* NaviolaSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001012F40C00100000001 /* NaviolaSettings.swift */; };
+		BB0001012F40C00100000004 /* NavidromePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001012F40C00100000003 /* NavidromePage.swift */; };
+		CC0001012F40D00100000002 /* NavidromeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000001 /* NavidromeProvider.swift */; };
+		CC0001012F40D00100000004 /* NavidromeStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000003 /* NavidromeStations.swift */; };
+		CC0001012F40D00100000006 /* NavidromeStationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000005 /* NavidromeStationDelegate.swift */; };
+		CC0001012F40D00100000008 /* NavidromeStationRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000007 /* NavidromeStationRows.swift */; };
+		CC0001012F40D0010000000A /* NavidromeSearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -199,11 +210,23 @@
 		39F869BA288C56C300273AB0 /* UpdatePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePanel.swift; sourceTree = "<group>"; };
 		39F869BB288C56C300273AB0 /* UpdatePanel.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UpdatePanel.xib; sourceTree = "<group>"; };
 		39FF07722933A59900751A03 /* StatuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatuBarController.swift; sourceTree = "<group>"; };
+		8A3A96BB2F73439C007E0B2A /* RadiolaDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RadiolaDebug.entitlements; sourceTree = "<group>"; };
 		9D1D31C92A06448200F0BA44 /* AdvancedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdvancedPage.swift; sourceTree = "<group>"; };
+		AA0001012F40B00100000001 /* NavidromeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeModels.swift; sourceTree = "<group>"; };
+		AA0001012F40B00100000003 /* NavidromeAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeAuth.swift; sourceTree = "<group>"; };
+		AA0001012F40B00100000005 /* NavidromeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeClient.swift; sourceTree = "<group>"; };
+		AA0001012F40B00100000007 /* TestNavidrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestNavidrome.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000002 /* HistoryDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDelegate.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000004 /* HistoryToolBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryToolBox.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000007 /* HistorySearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistorySearchPanel.swift; sourceTree = "<group>"; };
 		AAAA00012024120600000009 /* LocalStationSearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStationSearchPanel.swift; sourceTree = "<group>"; };
+		BB0001012F40C00100000001 /* NaviolaSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviolaSettings.swift; sourceTree = "<group>"; };
+		BB0001012F40C00100000003 /* NavidromePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromePage.swift; sourceTree = "<group>"; };
+		CC0001012F40D00100000001 /* NavidromeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeProvider.swift; sourceTree = "<group>"; };
+		CC0001012F40D00100000003 /* NavidromeStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeStations.swift; sourceTree = "<group>"; };
+		CC0001012F40D00100000005 /* NavidromeStationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeStationDelegate.swift; sourceTree = "<group>"; };
+		CC0001012F40D00100000007 /* NavidromeStationRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeStationRows.swift; sourceTree = "<group>"; };
+		CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeSearchPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -270,6 +293,8 @@
 				39950B9C2C7B2C4300C37952 /* OpmlStations.swift */,
 				39A7940D2B4B647E000D9875 /* RadioBrowserProvider.swift */,
 				39A794092B4B646D000D9875 /* InternetStations.swift */,
+				CC0001012F40D00100000001 /* NavidromeProvider.swift */,
+				CC0001012F40D00100000003 /* NavidromeStations.swift */,
 			);
 			path = Stations;
 			sourceTree = "<group>";
@@ -297,6 +322,7 @@
 		394F8A3A28739339005EA7FA /* Radiola */ = {
 			isa = PBXGroup;
 			children = (
+				8A3A96BB2F73439C007E0B2A /* RadiolaDebug.entitlements */,
 				394ABCAE2AA359E600E2B6E9 /* Stations */,
 				39F08E452A0CC582006B65D0 /* Types.swift */,
 				391500302EB89EB700060015 /* NotificationManager.swift */,
@@ -315,6 +341,7 @@
 				39D582C52C96C49B00AE3A01 /* VolumeView.swift */,
 				394F8A56287394F1005EA7FA /* Notifications.swift */,
 				39D79E622933BEAB00210D94 /* Settings.swift */,
+				BB0001012F40C00100000001 /* NaviolaSettings.swift */,
 				39E8DFD62890839500082467 /* Updater.swift */,
 				39ADF3832C98D4C9009794C3 /* MainMenu.xib */,
 				394F8A402873933A005EA7FA /* Assets.xcassets */,
@@ -327,6 +354,7 @@
 				39F869A3288C11B600273AB0 /* Preferences */,
 				39FF07712933A55600751A03 /* StatusBar */,
 				394ABCA52A9BBD1800E2B6E9 /* RadioBrowser */,
+				AA0001012F40B00100000009 /* Navidrome */,
 				39D582C32C96B40400AE3A01 /* Localizable.xcstrings */,
 			);
 			path = Radiola;
@@ -339,6 +367,7 @@
 				394F8A6228739A15005EA7FA /* StationsWindow.xib */,
 				39A794062B4B466C000D9875 /* LocalStations */,
 				396433972B55A0B1009BE1CE /* InternetStations */,
+				CC0001012F40D0010000000B /* NavidromeStations */,
 				3987B9A42A9F80B90077EB03 /* Toolbar */,
 				394ABC8C2A97AB5900E2B6E9 /* Sidebar */,
 				AAAA00012024120600000005 /* History */,
@@ -353,6 +382,7 @@
 				3959DBB52C03335C0032A1BA /* TestTrackMetadata.swift */,
 				3959DBAF2BFCE6C30032A1BA /* TestStationMerger.swift */,
 				398D34E52F40A49C00C9768B /* TestPlayList.swift */,
+				AA0001012F40B00100000007 /* TestNavidrome.swift */,
 			);
 			path = RadiolaTests;
 			sourceTree = "<group>";
@@ -425,6 +455,7 @@
 				392024B12A519FF900670ABD /* AppearancePage.swift */,
 				3967046A2944961500012FFD /* AudioPage.swift */,
 				9D1D31C92A06448200F0BA44 /* AdvancedPage.swift */,
+				BB0001012F40C00100000003 /* NavidromePage.swift */,
 				3967046B2944961500012FFD /* AudioPage.xib */,
 				39F869BB288C56C300273AB0 /* UpdatePanel.xib */,
 			);
@@ -442,6 +473,16 @@
 			path = StatusBar;
 			sourceTree = "<group>";
 		};
+		AA0001012F40B00100000009 /* Navidrome */ = {
+			isa = PBXGroup;
+			children = (
+				AA0001012F40B00100000001 /* NavidromeModels.swift */,
+				AA0001012F40B00100000003 /* NavidromeAuth.swift */,
+				AA0001012F40B00100000005 /* NavidromeClient.swift */,
+			);
+			path = Navidrome;
+			sourceTree = "<group>";
+		};
 		AAAA00012024120600000005 /* History */ = {
 			isa = PBXGroup;
 			children = (
@@ -451,6 +492,16 @@
 				AAAA00012024120600000004 /* HistoryToolBox.swift */,
 			);
 			path = History;
+			sourceTree = "<group>";
+		};
+		CC0001012F40D0010000000B /* NavidromeStations */ = {
+			isa = PBXGroup;
+			children = (
+				CC0001012F40D00100000005 /* NavidromeStationDelegate.swift */,
+				CC0001012F40D00100000007 /* NavidromeStationRows.swift */,
+				CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */,
+			);
+			path = NavidromeStations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -645,6 +696,16 @@
 				AAAA00012024120600000003 /* HistoryToolBox.swift in Sources */,
 				AAAA00012024120600000006 /* HistorySearchPanel.swift in Sources */,
 				AAAA00012024120600000008 /* LocalStationSearchPanel.swift in Sources */,
+				AA0001012F40B00100000002 /* NavidromeModels.swift in Sources */,
+				AA0001012F40B00100000004 /* NavidromeAuth.swift in Sources */,
+				AA0001012F40B00100000006 /* NavidromeClient.swift in Sources */,
+				BB0001012F40C00100000002 /* NaviolaSettings.swift in Sources */,
+				BB0001012F40C00100000004 /* NavidromePage.swift in Sources */,
+				CC0001012F40D00100000002 /* NavidromeProvider.swift in Sources */,
+				CC0001012F40D00100000004 /* NavidromeStations.swift in Sources */,
+				CC0001012F40D00100000006 /* NavidromeStationDelegate.swift in Sources */,
+				CC0001012F40D00100000008 /* NavidromeStationRows.swift in Sources */,
+				CC0001012F40D0010000000A /* NavidromeSearchPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -656,6 +717,7 @@
 				3959DBB62C03335C0032A1BA /* TestTrackMetadata.swift in Sources */,
 				3959DBA92BFCE6A50032A1BA /* RadiolaTests.swift in Sources */,
 				398D34E62F40A49C00C9768B /* TestPlayList.swift in Sources */,
+				AA0001012F40B00100000008 /* TestNavidrome.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -807,13 +869,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = Radiola/Radiola.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Radiola/RadiolaDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 11.1.1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 635H9TYSZJ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Radiola/Info.plist;
@@ -841,11 +904,11 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Radiola/Radiola.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 11.1.1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 635H9TYSZJ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Radiola/Info.plist;

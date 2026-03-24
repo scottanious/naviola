@@ -360,6 +360,9 @@
         }
       }
     },
+    "Album pinned to My lists" : {
+      "comment" : "Pin button tooltip"
+    },
     "Are you sure you want to continue?" : {
       "comment" : "Merger dialog message",
       "localizations" : {
@@ -940,6 +943,9 @@
         }
       }
     },
+    "Connection error" : {
+      "comment" : "Navidrome placeholder"
+    },
     "Connection time has expired" : {
       "comment" : "Player error message.",
       "localizations" : {
@@ -1451,7 +1457,7 @@
       }
     },
     "Loading…" : {
-      "comment" : "Internet stations placeholder",
+      "comment" : "Internet stations placeholder\nNavidrome placeholder",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1764,6 +1770,9 @@
         }
       }
     },
+    "Naviola" : {
+      "comment" : "Sidebar group"
+    },
     "No records yet" : {
       "comment" : "History window placeholder",
       "extractionState" : "stale",
@@ -1795,7 +1804,7 @@
       }
     },
     "No results" : {
-      "comment" : "Internet stations placeholder",
+      "comment" : "Internet stations placeholder\nNavidrome placeholder",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1939,6 +1948,9 @@
         }
       }
     },
+    "Pin album to My lists" : {
+      "comment" : "Pin button tooltip"
+    },
     "Play" : {
       "comment" : "Toolbar button toolTip",
       "localizations" : {
@@ -2077,6 +2089,12 @@
           }
         }
       }
+    },
+    "Recently Added" : {
+      "comment" : "Navidrome station list"
+    },
+    "Refresh" : {
+      "comment" : "Navidrome search panel"
     },
     "Remove station" : {
       "comment" : "Button title",
