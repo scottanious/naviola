@@ -2,28 +2,66 @@
 //  ToolbarPlayView.swift
 //  Radiola
 //
-//  Naviola — Fully programmatic toolbar with play controls, skip buttons,
-//  and track info. Replaces XIB-based layout for full control.
+//  Naviola — Programmatic toolbar with transport controls, track info,
+//  repeat/shuffle toggles, and live progress bar.
 //
 
 import Cocoa
 
 class ToolbarPlayView: NSViewController {
-    private let playButton = NSButton()
+    // Transport controls
     private let prevButton = NSButton()
+    private let playButton = NSButton()
     private let nextButton = NSButton()
+
+    // Track info
     private let songLabel = Label()
     private let stationLabel = Label()
     private let onlyStationLabel = Label()
 
+    // Repeat/shuffle
+    private let repeatButton = NSButton()
+    private let shuffleButton = NSButton()
+
+    // Progress
+    private let progressBar = NSProgressIndicator()
+    private let timeLabel = Label()
+
+    private var progressTimer: Timer?
+
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 52))
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 500, height: 52))
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Play button
+        setupTransportControls()
+        setupTrackLabels()
+        setupModeControls()
+        setupProgressBar()
+        setupLayout()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
+                                               name: Notification.Name.PlayerStatusChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
+                                               name: Notification.Name.PlayerMetadataChanged, object: nil)
+
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshProgress()
+        }
+
+        refresh()
+    }
+
+    deinit {
+        progressTimer?.invalidate()
+    }
+
+    // MARK: - Setup
+
+    private func setupTransportControls() {
+        // Play button — larger, prominent
         view.addSubview(playButton)
         playButton.bezelStyle = .regularSquare
         playButton.setButtonType(.momentaryPushIn)
@@ -35,7 +73,7 @@ class ToolbarPlayView: NSViewController {
         playButton.keyEquivalent = " "
         playButton.keyEquivalentModifierMask = []
 
-        // Skip buttons
+        // Skip buttons — medium size
         for btn in [prevButton, nextButton] {
             view.addSubview(btn)
             btn.bezelStyle = .regularSquare
@@ -54,81 +92,148 @@ class ToolbarPlayView: NSViewController {
         nextButton.image?.isTemplate = true
         nextButton.target = self
         nextButton.action = #selector(nextTrack)
+    }
 
-        // Song label (primary)
+    private func setupTrackLabels() {
         view.addSubview(songLabel)
         songLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         songLabel.textColor = .labelColor
         songLabel.lineBreakMode = .byTruncatingTail
         songLabel.usesSingleLineMode = true
 
-        // Station/artist label (secondary)
         view.addSubview(stationLabel)
         stationLabel.font = NSFont.systemFont(ofSize: 11)
         stationLabel.textColor = .secondaryLabelColor
         stationLabel.lineBreakMode = .byTruncatingTail
         stationLabel.usesSingleLineMode = true
 
-        // Only-station label (when no song playing)
         view.addSubview(onlyStationLabel)
         onlyStationLabel.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
         onlyStationLabel.textColor = .labelColor
         onlyStationLabel.lineBreakMode = .byTruncatingTail
         onlyStationLabel.usesSingleLineMode = true
+    }
 
-        // Layout
-        playButton.translatesAutoresizingMaskIntoConstraints = false
-        prevButton.translatesAutoresizingMaskIntoConstraints = false
-        nextButton.translatesAutoresizingMaskIntoConstraints = false
-        songLabel.translatesAutoresizingMaskIntoConstraints = false
-        stationLabel.translatesAutoresizingMaskIntoConstraints = false
-        onlyStationLabel.translatesAutoresizingMaskIntoConstraints = false
+    private func setupModeControls() {
+        for btn in [repeatButton, shuffleButton] {
+            view.addSubview(btn)
+            btn.bezelStyle = .regularSquare
+            btn.setButtonType(.momentaryPushIn)
+            btn.imagePosition = .imageOnly
+            btn.isBordered = false
+            btn.imageScaling = .scaleProportionallyDown
+        }
+
+        repeatButton.target = self
+        repeatButton.action = #selector(toggleRepeat)
+
+        shuffleButton.image = NSImage(systemSymbolName: "shuffle", accessibilityDescription: "Shuffle")
+        shuffleButton.image?.isTemplate = true
+        shuffleButton.target = self
+        shuffleButton.action = #selector(toggleShuffle)
+    }
+
+    private func setupProgressBar() {
+        view.addSubview(progressBar)
+        progressBar.style = .bar
+        progressBar.isIndeterminate = false
+        progressBar.minValue = 0
+        progressBar.maxValue = 1
+        progressBar.controlSize = .small
+
+        view.addSubview(timeLabel)
+        timeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .regular)
+        timeLabel.textColor = .tertiaryLabelColor
+        timeLabel.alignment = .right
+    }
+
+    private func setupLayout() {
+        let allViews: [NSView] = [prevButton, playButton, nextButton,
+                                   songLabel, stationLabel, onlyStationLabel,
+                                   repeatButton, shuffleButton,
+                                   progressBar, timeLabel]
+        for v in allViews {
+            v.translatesAutoresizingMaskIntoConstraints = false
+            v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        }
+
+        // Fixed sizes for buttons
+        prevButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        playButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        nextButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        repeatButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        shuffleButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        timeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        timeLabel.setContentHuggingPriority(.required, for: .horizontal)
+
+        let btnSize: CGFloat = 22
+        let smallBtnSize: CGFloat = 16
 
         NSLayoutConstraint.activate([
-            // Play: 28x28, leading
+            // Row 1: [prev] [play] [next]  Song Title  [repeat] [shuffle]
+            //         Artist — Album
+
+            // Play button — center-left
             playButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
-            playButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            playButton.widthAnchor.constraint(equalToConstant: 28),
-            playButton.heightAnchor.constraint(equalToConstant: 28),
+            playButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+            playButton.widthAnchor.constraint(equalToConstant: 32),
+            playButton.heightAnchor.constraint(equalToConstant: 32),
 
-            // Prev: 14x14
-            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 6),
-            prevButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            prevButton.widthAnchor.constraint(equalToConstant: 14),
-            prevButton.heightAnchor.constraint(equalToConstant: 14),
+            // Prev
+            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 4),
+            prevButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            prevButton.widthAnchor.constraint(equalToConstant: btnSize),
+            prevButton.heightAnchor.constraint(equalToConstant: btnSize),
 
-            // Next: 14x14
-            nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 6),
-            nextButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            nextButton.widthAnchor.constraint(equalToConstant: 14),
-            nextButton.heightAnchor.constraint(equalToConstant: 14),
+            // Next
+            nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 4),
+            nextButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            nextButton.widthAnchor.constraint(equalToConstant: btnSize),
+            nextButton.heightAnchor.constraint(equalToConstant: btnSize),
 
-            // Song label: after skip buttons, top half
+            // Song label
             songLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 10),
-            songLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
-            songLabel.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -1),
+            songLabel.bottomAnchor.constraint(equalTo: playButton.centerYAnchor, constant: -1),
 
-            // Station label: below song label
+            // Station label
             stationLabel.leadingAnchor.constraint(equalTo: songLabel.leadingAnchor),
-            stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
-            stationLabel.topAnchor.constraint(equalTo: view.centerYAnchor, constant: 2),
+            stationLabel.topAnchor.constraint(equalTo: playButton.centerYAnchor, constant: 2),
 
-            // Only-station label: centered vertically, same leading
+            // Only-station label
             onlyStationLabel.leadingAnchor.constraint(equalTo: songLabel.leadingAnchor),
+            onlyStationLabel.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+
+            // Shuffle (rightmost)
+            shuffleButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            shuffleButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            shuffleButton.widthAnchor.constraint(equalToConstant: smallBtnSize),
+            shuffleButton.heightAnchor.constraint(equalToConstant: smallBtnSize),
+
+            // Repeat
+            repeatButton.trailingAnchor.constraint(equalTo: shuffleButton.leadingAnchor, constant: -8),
+            repeatButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            repeatButton.widthAnchor.constraint(equalToConstant: smallBtnSize),
+            repeatButton.heightAnchor.constraint(equalToConstant: smallBtnSize),
+
+            // Labels trail before mode buttons
+            songLabel.trailingAnchor.constraint(lessThanOrEqualTo: repeatButton.leadingAnchor, constant: -10),
+            stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
             onlyStationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
-            onlyStationLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
+            // Row 2: Progress bar + time label (below transport)
+            progressBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
+            progressBar.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 3),
+            progressBar.heightAnchor.constraint(equalToConstant: 3),
+
+            timeLabel.leadingAnchor.constraint(equalTo: progressBar.trailingAnchor, constant: 4),
+            timeLabel.centerYAnchor.constraint(equalTo: progressBar.centerYAnchor),
+            timeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+
+            progressBar.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -4),
         ])
-
-        songLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        stationLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        onlyStationLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
-                                               name: Notification.Name.PlayerStatusChanged, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
-                                               name: Notification.Name.PlayerMetadataChanged, object: nil)
-        refresh()
     }
+
+    // MARK: - Refresh
 
     @objc private func refresh() {
         // Play/pause icon
@@ -162,31 +267,92 @@ class ToolbarPlayView: NSViewController {
             }
         }
 
-        // Toggle between two-line and single-line display
         let hasSong = !songLabel.stringValue.isEmpty
         onlyStationLabel.stringValue = stationLabel.stringValue
         onlyStationLabel.isHidden = hasSong
         songLabel.isHidden = !hasSong
         stationLabel.isHidden = !hasSong
 
-        // Skip buttons: show only when queue is active
+        // Skip buttons
         let queue = NaviolaPlayQueue.shared
         prevButton.isHidden = !queue.isActive
         nextButton.isHidden = !queue.isActive
         prevButton.isEnabled = queue.currentIndex > 0
         nextButton.isEnabled = queue.currentIndex + 1 < queue.tracks.count || queue.repeatMode != .off
+
+        // Repeat/shuffle
+        repeatButton.isHidden = !queue.isActive
+        shuffleButton.isHidden = !queue.isActive
+
+        switch queue.repeatMode {
+        case .off:
+            repeatButton.image = NSImage(systemSymbolName: "repeat", accessibilityDescription: "Repeat off")
+            repeatButton.contentTintColor = .tertiaryLabelColor
+        case .all:
+            repeatButton.image = NSImage(systemSymbolName: "repeat", accessibilityDescription: "Repeat all")
+            repeatButton.contentTintColor = .controlAccentColor
+        case .one:
+            repeatButton.image = NSImage(systemSymbolName: "repeat.1", accessibilityDescription: "Repeat one")
+            repeatButton.contentTintColor = .controlAccentColor
+        }
+
+        shuffleButton.contentTintColor = queue.shuffleEnabled ? .controlAccentColor : .tertiaryLabelColor
+
+        // Progress bar visibility
+        progressBar.isHidden = !queue.isActive
+        timeLabel.isHidden = !queue.isActive
+
+        refreshProgress()
     }
+
+    private func refreshProgress() {
+        let queue = NaviolaPlayQueue.shared
+        guard queue.isActive,
+              let track = queue.currentTrack,
+              let duration = track.duration, duration > 0 else {
+            progressBar.doubleValue = 0
+            timeLabel.stringValue = ""
+            return
+        }
+
+        if let startTime = queue.trackStartTime {
+            let elapsed = min(Date().timeIntervalSince(startTime), Double(duration))
+            progressBar.doubleValue = elapsed / Double(duration)
+            timeLabel.stringValue = "\(formatTime(Int(elapsed))) / \(formatTime(duration))"
+        } else {
+            progressBar.doubleValue = 0
+            timeLabel.stringValue = "0:00 / \(formatTime(duration))"
+        }
+    }
+
+    private func formatTime(_ seconds: Int) -> String {
+        let m = seconds / 60
+        let s = seconds % 60
+        return String(format: "%d:%02d", m, s)
+    }
+
+    // MARK: - Actions
 
     @objc private func togglePlay() {
         if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
         player.toggle()
     }
 
-    @objc private func previousTrack() {
-        NaviolaPlayQueue.shared.previous()
+    @objc private func previousTrack() { NaviolaPlayQueue.shared.previous() }
+    @objc private func nextTrack() { NaviolaPlayQueue.shared.next() }
+
+    @objc private func toggleRepeat() {
+        let q = NaviolaPlayQueue.shared
+        switch q.repeatMode {
+        case .off: q.repeatMode = .all
+        case .all: q.repeatMode = .one
+        case .one: q.repeatMode = .off
+        }
+        refresh()
     }
 
-    @objc private func nextTrack() {
-        NaviolaPlayQueue.shared.next()
+    @objc private func toggleShuffle() {
+        NaviolaPlayQueue.shared.shuffleEnabled.toggle()
+        refresh()
     }
 }

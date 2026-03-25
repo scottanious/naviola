@@ -164,6 +164,8 @@ fileprivate class NaviolaPlaybackView: NSView {
         } else {
             timeLabel.stringValue = ""
         }
+        // Force NSMenu to redraw this custom view
+        needsDisplay = true
     }
 
     private func formatTime(_ seconds: Int) -> String {
