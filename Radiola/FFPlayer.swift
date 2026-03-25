@@ -646,46 +646,54 @@ fileprivate class Backend {
      *
      * ****************************************/
     fileprivate func setError(_ error: NSError) {
+        debug("[FFPlayer] setError called: code=\(error.code), userInterrupt=\(userInterrupt.value), message=\(error.localizedDescription)")
+
         if userInterrupt.value || error.code == averror_exit {
+            debug("[FFPlayer] User interrupt or exit — immediate stop")
             stop()
             setState(.stoped)
             return
         }
 
-        // For EOF/stream errors: let audio queue drain its buffers before stopping.
-        // AudioQueueStop(queue, false) plays remaining enqueued audio, then stops.
-        // This prevents cutting off the last seconds of a track.
+        // For EOF/stream errors: let audio queue drain its buffers before
+        // reporting state change. Do NOT set frontend.state until drain is complete,
+        // otherwise the play queue advances and kills the remaining audio.
+        debug("[FFPlayer] Graceful drain — AudioQueueStop(false)")
         if let audioQueue = audioQueue {
-            AudioQueueStop(audioQueue, false) // false = drain, don't discard
+            AudioQueueStop(audioQueue, false) // false = drain remaining buffers
 
-            // Wait for the queue to finish playing buffered audio.
-            // Poll briefly — the audio queue will stop on its own after draining.
-            DispatchQueue.global(qos: .background).async { [weak self] in
-                // Give buffers time to drain (up to 30 seconds max)
-                Thread.sleep(forTimeInterval: 0.5)
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                // Poll until audio queue stops running (buffers fully drained)
                 var waitCount = 0
-                while waitCount < 60 {
+                while waitCount < 120 { // up to 60 seconds
                     var isRunning: UInt32 = 0
                     var size = UInt32(MemoryLayout<UInt32>.size)
                     let err = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_IsRunning, &isRunning, &size)
-                    if err != noErr || isRunning == 0 { break }
+                    if err != noErr || isRunning == 0 {
+                        debug("[FFPlayer] Audio queue drained after \(waitCount * 500)ms")
+                        break
+                    }
                     Thread.sleep(forTimeInterval: 0.5)
                     waitCount += 1
                 }
 
+                // NOW report state change — audio has finished playing
                 self?.queue.async {
-                    Task { @MainActor in
-                        self?.frontend.state = .error
-                    }
                     self?.cleanupResources()
+                    // Don't set frontend.error for EOF — it triggers an alarm dialog.
+                    // Just transition to .stoped which maps to Player .paused.
+                    Task { @MainActor in
+                        self?.frontend.state = .stoped
+                        self?.frontend.nowPlaing = ""
+                    }
                 }
             }
         } else {
-            Task { @MainActor in
-                self.frontend.error = error
-                self.frontend.state = .error
-            }
             cleanupResources()
+            Task { @MainActor in
+                self.frontend.state = .stoped
+                self.frontend.nowPlaing = ""
+            }
         }
     }
 
@@ -747,9 +755,11 @@ fileprivate func decode(backend: Backend, delay: TimeInterval) {
             backend.ringBuffer.incWriteIndex()
         }
     } catch {
+        let nsError = error as NSError
+        debug("[FFPlayer] Decoder exited: code=\(nsError.code), domain=\(nsError.domain), desc=\(error.localizedDescription)")
         warning(error)
         backend.queue.async {
-            backend.setError(error as NSError)
+            backend.setError(nsError)
         }
     }
 }
@@ -775,7 +785,8 @@ fileprivate func decodeBuffer(backend: Backend, outBuffer: RingBuffer.Buffer) th
         }
 
         if err < 0 {
-            throw NSError(ffCode: err, message: timeoutErrorDescription, debug: "Error calling av_read_frame")
+            debug("[FFPlayer] av_read_frame returned \(err), shouldInterrupt=\(backend.shouldInterrupt.value), userInterrupt=\(backend.userInterrupt.value)")
+            throw NSError(ffCode: err, message: timeoutErrorDescription, debug: "Error calling av_read_frame err=\(err)")
         }
 
         timeoutCount = 0
@@ -898,6 +909,9 @@ let interruptCallback: FFmpegInterruptCallback = { opaque in
     guard let opaque else { return 0 }
     let backend = Unmanaged<Backend>.fromOpaque(opaque).takeUnretainedValue()
 
+    if backend.shouldInterrupt.value {
+        debug("[FFPlayer] Interrupt callback returning 1 (shouldInterrupt=true)")
+    }
     return backend.shouldInterrupt.value ? 1 : 0
 }
 
