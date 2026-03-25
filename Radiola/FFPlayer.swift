@@ -392,24 +392,7 @@ fileprivate class Backend {
 
         formatContext.pointee.interrupt_callback = interruptCB
 
-        // Increase probesize and analyzeduration to handle MP3 files with large
-        // ID3 tags (embedded album art). Without this, FFmpeg miscalculates the
-        // audio duration and reports EOF before the audio stream actually ends.
-        formatContext.pointee.probesize = 10 * 1024 * 1024       // 10 MB
-        formatContext.pointee.max_analyze_duration = 10 * 1000000 // 10 seconds
-
-        // Force MP3 demuxer for Navidrome URLs to avoid ID3 tag duration
-        // miscalculation. The bundled FFmpeg's auto-detect mishandles MP3 files
-        // with large embedded album art, causing premature EOF.
-        let inputFormat: UnsafePointer<AVInputFormat>?
-        if url.absoluteString.contains("/rest/stream.view") {
-            inputFormat = av_find_input_format("mp3")
-            debug("[FFPlayer] Forcing mp3 input format for Navidrome stream")
-        } else {
-            inputFormat = nil
-        }
-
-        err = avformat_open_input(&formatContext, url.absoluteString, inputFormat, &options)
+        err = avformat_open_input(&formatContext, url.absoluteString, nil, &options)
         if err < 0 {
             av_dict_free(&options)
             throw NSError(ffCode: err, message: invalidURLErrorDescription, debug: "Error calling avformat_open_input")
@@ -673,10 +656,7 @@ fileprivate class Backend {
      *
      * ****************************************/
     fileprivate func setError(_ error: NSError) {
-        debug("[FFPlayer] setError called: code=\(error.code), userInterrupt=\(userInterrupt.value), message=\(error.localizedDescription)")
-
         if userInterrupt.value || error.code == averror_exit {
-            debug("[FFPlayer] User interrupt or exit — immediate stop")
             stop()
             setState(.stoped)
             return
@@ -685,7 +665,6 @@ fileprivate class Backend {
         // For EOF/stream errors: let audio queue drain its buffers before
         // reporting state change. Do NOT set frontend.state until drain is complete,
         // otherwise the play queue advances and kills the remaining audio.
-        debug("[FFPlayer] Graceful drain — AudioQueueStop(false)")
         if let audioQueue = audioQueue {
             AudioQueueStop(audioQueue, false) // false = drain remaining buffers
 
@@ -696,10 +675,7 @@ fileprivate class Backend {
                     var isRunning: UInt32 = 0
                     var size = UInt32(MemoryLayout<UInt32>.size)
                     let err = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_IsRunning, &isRunning, &size)
-                    if err != noErr || isRunning == 0 {
-                        debug("[FFPlayer] Audio queue drained after \(waitCount * 500)ms")
-                        break
-                    }
+                    if err != noErr || isRunning == 0 { break }
                     Thread.sleep(forTimeInterval: 0.5)
                     waitCount += 1
                 }
@@ -782,11 +758,9 @@ fileprivate func decode(backend: Backend, delay: TimeInterval) {
             backend.ringBuffer.incWriteIndex()
         }
     } catch {
-        let nsError = error as NSError
-        debug("[FFPlayer] Decoder exited: code=\(nsError.code), domain=\(nsError.domain), desc=\(error.localizedDescription)")
         warning(error)
         backend.queue.async {
-            backend.setError(nsError)
+            backend.setError(error as NSError)
         }
     }
 }
@@ -812,8 +786,7 @@ fileprivate func decodeBuffer(backend: Backend, outBuffer: RingBuffer.Buffer) th
         }
 
         if err < 0 {
-            debug("[FFPlayer] av_read_frame returned \(err), shouldInterrupt=\(backend.shouldInterrupt.value), userInterrupt=\(backend.userInterrupt.value)")
-            throw NSError(ffCode: err, message: timeoutErrorDescription, debug: "Error calling av_read_frame err=\(err)")
+            throw NSError(ffCode: err, message: timeoutErrorDescription, debug: "Error calling av_read_frame")
         }
 
         timeoutCount = 0
@@ -936,9 +909,6 @@ let interruptCallback: FFmpegInterruptCallback = { opaque in
     guard let opaque else { return 0 }
     let backend = Unmanaged<Backend>.fromOpaque(opaque).takeUnretainedValue()
 
-    if backend.shouldInterrupt.value {
-        debug("[FFPlayer] Interrupt callback returning 1 (shouldInterrupt=true)")
-    }
     return backend.shouldInterrupt.value ? 1 : 0
 }
 
