@@ -196,20 +196,13 @@ class NaviolaPlayQueue: ObservableObject {
                 return
             }
 
-            // Must have played for at least 2 seconds (guards against rapid
-            // state transitions during track startup)
-            if let startTime = trackStartTime, Date().timeIntervalSince(startTime) < 2.0 {
-                return
-            }
-
-            // Track ended naturally — wait for audio buffers to drain before advancing.
-            // FFPlayer's decoder hits EOF before the audio queue finishes playing
-            // the last few seconds of buffered audio. A longer delay ensures the
-            // listener hears the full track.
+            // Track ended naturally. FFPlayer now drains audio buffers before
+            // reporting .paused, so the full track has been heard. Advance
+            // immediately.
             trackStartTime = nil
             confirmedPlaying = false
             let expectedGen = playGeneration
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            DispatchQueue.main.async { [weak self] in
                 guard let self = self, self.playGeneration == expectedGen else { return }
                 self.next()
             }

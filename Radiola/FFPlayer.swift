@@ -652,11 +652,77 @@ fileprivate class Backend {
             return
         }
 
-        Task { @MainActor in
-            self.frontend.error = error
-            self.frontend.state = .error
+        // For EOF/stream errors: let audio queue drain its buffers before stopping.
+        // AudioQueueStop(queue, false) plays remaining enqueued audio, then stops.
+        // This prevents cutting off the last seconds of a track.
+        if let audioQueue = audioQueue {
+            AudioQueueStop(audioQueue, false) // false = drain, don't discard
+
+            // Wait for the queue to finish playing buffered audio.
+            // Poll briefly — the audio queue will stop on its own after draining.
+            DispatchQueue.global(qos: .background).async { [weak self] in
+                // Give buffers time to drain (up to 30 seconds max)
+                Thread.sleep(forTimeInterval: 0.5)
+                var waitCount = 0
+                while waitCount < 60 {
+                    var isRunning: UInt32 = 0
+                    var size = UInt32(MemoryLayout<UInt32>.size)
+                    let err = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_IsRunning, &isRunning, &size)
+                    if err != noErr || isRunning == 0 { break }
+                    Thread.sleep(forTimeInterval: 0.5)
+                    waitCount += 1
+                }
+
+                self?.queue.async {
+                    Task { @MainActor in
+                        self?.frontend.state = .error
+                    }
+                    self?.cleanupResources()
+                }
+            }
+        } else {
+            Task { @MainActor in
+                self.frontend.error = error
+                self.frontend.state = .error
+            }
+            cleanupResources()
         }
-        stop()
+    }
+
+    /// Clean up FFmpeg/audio resources without stopping the audio queue
+    /// (used after graceful drain).
+    private func cleanupResources() {
+        if let audioQueue = audioQueue {
+            AudioQueueDispose(audioQueue, true)
+            self.audioQueue = nil
+        }
+
+        while let thread = ffmpegThread, thread.isExecuting {
+            Thread.sleep(forTimeInterval: 0.01)
+        }
+
+        if swrContext != nil {
+            swr_free(&swrContext)
+            swrContext = nil
+        }
+
+        if codecContext != nil {
+            avcodec_free_context(&codecContext)
+            codecContext = nil
+        }
+
+        if formatContext != nil {
+            avformat_close_input(&formatContext)
+            formatContext = nil
+        }
+
+        av_channel_layout_uninit(&outLayout)
+        prevNowPlaying = ""
+
+        Task.detached { @MainActor in
+            if self.frontend.state != .stoped { self.frontend.state = .stoped }
+            if self.frontend.nowPlaing != "" { self.frontend.nowPlaing = "" }
+        }
     }
 }
 
