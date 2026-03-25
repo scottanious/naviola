@@ -2,92 +2,47 @@
 //  ToolbarPlayView.swift
 //  Radiola
 //
-//  Created by Aleksandr Sokolov on 30.08.2023.
+//  Naviola — Fully programmatic toolbar with play controls, skip buttons,
+//  and track info. Replaces XIB-based layout for full control.
 //
 
 import Cocoa
 
 class ToolbarPlayView: NSViewController {
-    @IBOutlet var playButton: NSButton!
-    @IBOutlet var songLabel: NSTextField!
-    @IBOutlet var stationLabel: NSTextField!
-    private let onlyStationLabel = Label()
-
-    // Naviola: skip/back buttons
+    private let playButton = NSButton()
     private let prevButton = NSButton()
     private let nextButton = NSButton()
+    private let songLabel = Label()
+    private let stationLabel = Label()
+    private let onlyStationLabel = Label()
 
-    /* ****************************************
-     *
-     * ****************************************/
+    override func loadView() {
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 52))
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.addSubview(onlyStationLabel)
-        onlyStationLabel.textColor = stationLabel.textColor
-        onlyStationLabel.lineBreakMode = .byClipping
-        onlyStationLabel.font = NSFont.systemFont(ofSize: 14)
-        onlyStationLabel.setFontWeight(.semibold)
-        onlyStationLabel.lineBreakMode = .byTruncatingTail
-        onlyStationLabel.usesSingleLineMode = true
-        onlyStationLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        onlyStationLabel.leadingAnchor.constraint(equalTo: stationLabel.leadingAnchor).isActive = true
-        onlyStationLabel.trailingAnchor.constraint(equalTo: stationLabel.trailingAnchor).isActive = true
-        onlyStationLabel.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
-
-        songLabel.lineBreakMode = .byTruncatingMiddle
-        songLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        songLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        songLabel.menu = ContextMenu(textField: songLabel)
-
-        stationLabel.lineBreakMode = .byTruncatingMiddle
-        stationLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        stationLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        stationLabel.menu = ContextMenu(textField: stationLabel)
-
-        playButton.setContentHuggingPriority(NSLayoutConstraint.Priority(240) /* .defaultLow */, for: NSLayoutConstraint.Orientation.horizontal)
-        playButton.bezelStyle = NSButton.BezelStyle.regularSquare
-        playButton.setButtonType(NSButton.ButtonType.momentaryPushIn)
-        playButton.imagePosition = NSControl.ImagePosition.imageOnly
-        playButton.alignment = NSTextAlignment.center
-        playButton.lineBreakMode = NSLineBreakMode.byTruncatingTail
-        playButton.state = NSControl.StateValue.on
+        // Play button
+        view.addSubview(playButton)
+        playButton.bezelStyle = .regularSquare
+        playButton.setButtonType(.momentaryPushIn)
+        playButton.imagePosition = .imageOnly
         playButton.isBordered = false
-        playButton.imageScaling = NSImageScaling.scaleNone
-        playButton.font = NSFont.systemFont(ofSize: 24)
-        playButton.image?.isTemplate = true
+        playButton.imageScaling = .scaleNone
         playButton.target = self
         playButton.action = #selector(togglePlay)
         playButton.keyEquivalent = " "
         playButton.keyEquivalentModifierMask = []
 
-        // Naviola: skip/back buttons — positioned AFTER playButton, not flanking it
-        setupSkipButtons()
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(refresh),
-                                               name: Notification.Name.PlayerStatusChanged,
-                                               object: nil)
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(refresh),
-                                               name: Notification.Name.PlayerMetadataChanged,
-                                               object: nil)
-
-        refresh()
-    }
-
-    // Naviola: set up skip/back buttons to the right of play button, before song label
-    private func setupSkipButtons() {
+        // Skip buttons
         for btn in [prevButton, nextButton] {
             view.addSubview(btn)
-            btn.bezelStyle = NSButton.BezelStyle.regularSquare
-            btn.setButtonType(NSButton.ButtonType.momentaryPushIn)
-            btn.imagePosition = NSControl.ImagePosition.imageOnly
+            btn.bezelStyle = .regularSquare
+            btn.setButtonType(.momentaryPushIn)
+            btn.imagePosition = .imageOnly
             btn.isBordered = false
-            btn.imageScaling = NSImageScaling.scaleNone
-            btn.translatesAutoresizingMaskIntoConstraints = false
+            btn.imageScaling = .scaleProportionallyDown
         }
 
         prevButton.image = NSImage(systemSymbolName: "backward.fill", accessibilityDescription: "Previous")
@@ -100,84 +55,121 @@ class ToolbarPlayView: NSViewController {
         nextButton.target = self
         nextButton.action = #selector(nextTrack)
 
+        // Song label (primary)
+        view.addSubview(songLabel)
+        songLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+        songLabel.textColor = .labelColor
+        songLabel.lineBreakMode = .byTruncatingTail
+        songLabel.usesSingleLineMode = true
+
+        // Station/artist label (secondary)
+        view.addSubview(stationLabel)
+        stationLabel.font = NSFont.systemFont(ofSize: 11)
+        stationLabel.textColor = .secondaryLabelColor
+        stationLabel.lineBreakMode = .byTruncatingTail
+        stationLabel.usesSingleLineMode = true
+
+        // Only-station label (when no song playing)
+        view.addSubview(onlyStationLabel)
+        onlyStationLabel.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
+        onlyStationLabel.textColor = .labelColor
+        onlyStationLabel.lineBreakMode = .byTruncatingTail
+        onlyStationLabel.usesSingleLineMode = true
+
+        // Layout
+        playButton.translatesAutoresizingMaskIntoConstraints = false
+        prevButton.translatesAutoresizingMaskIntoConstraints = false
+        nextButton.translatesAutoresizingMaskIntoConstraints = false
+        songLabel.translatesAutoresizingMaskIntoConstraints = false
+        stationLabel.translatesAutoresizingMaskIntoConstraints = false
+        onlyStationLabel.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            prevButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
-            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 8),
+            // Play: 28x28, leading
+            playButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
+            playButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            playButton.widthAnchor.constraint(equalToConstant: 28),
+            playButton.heightAnchor.constraint(equalToConstant: 28),
+
+            // Prev: 14x14
+            prevButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 6),
+            prevButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             prevButton.widthAnchor.constraint(equalToConstant: 14),
             prevButton.heightAnchor.constraint(equalToConstant: 14),
 
-            nextButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            // Next: 14x14
             nextButton.leadingAnchor.constraint(equalTo: prevButton.trailingAnchor, constant: 6),
+            nextButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             nextButton.widthAnchor.constraint(equalToConstant: 14),
             nextButton.heightAnchor.constraint(equalToConstant: 14),
+
+            // Song label: after skip buttons, top half
+            songLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 10),
+            songLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
+            songLabel.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -1),
+
+            // Station label: below song label
+            stationLabel.leadingAnchor.constraint(equalTo: songLabel.leadingAnchor),
+            stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
+            stationLabel.topAnchor.constraint(equalTo: view.centerYAnchor, constant: 2),
+
+            // Only-station label: centered vertically, same leading
+            onlyStationLabel.leadingAnchor.constraint(equalTo: songLabel.leadingAnchor),
+            onlyStationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
+            onlyStationLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
 
-        // Override XIB constraints: labels must start after skip buttons, not after playButton.
-        // Find and deactivate the XIB's leading constraints on songLabel and stationLabel.
-        for constraint in view.constraints {
-            if constraint.identifier == "gef-ca-Bb6" || constraint.identifier == "xzb-JE-Bg0" {
-                constraint.isActive = false
+        songLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        stationLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        onlyStationLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
+                                               name: Notification.Name.PlayerStatusChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(refresh),
+                                               name: Notification.Name.PlayerMetadataChanged, object: nil)
+        refresh()
+    }
+
+    @objc private func refresh() {
+        // Play/pause icon
+        switch player.status {
+        case .paused:
+            playButton.image = NSImage(named: NSImage.Name("NSTouchBarPlayTemplate"))
+            playButton.image?.isTemplate = true
+        case .connecting, .playing:
+            playButton.image = NSImage(named: NSImage.Name("NSTouchBarPauseTemplate"))
+            playButton.image?.isTemplate = true
+        }
+
+        // Song/station text
+        switch player.status {
+        case .paused:
+            songLabel.stringValue = ""
+            stationLabel.stringValue = player.stationName
+        case .connecting:
+            songLabel.stringValue = NSLocalizedString("Connecting…", comment: "")
+            stationLabel.stringValue = player.stationName
+        case .playing:
+            if let track = player.station as? NavidromeTrack {
+                songLabel.stringValue = track.title
+                var detail = [String]()
+                if let artist = track.artist { detail.append(artist) }
+                if let album = track.albumTitle { detail.append(album) }
+                stationLabel.stringValue = detail.joined(separator: " — ")
+            } else {
+                songLabel.stringValue = player.songTitle
+                stationLabel.stringValue = player.stationName
             }
         }
 
-        // Re-anchor labels after the skip buttons
-        songLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 8).isActive = true
-        stationLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 8).isActive = true
-    }
-
-    /* ****************************************
-     *
-     * ****************************************/
-    @objc private func refresh() {
-        switch player.status {
-            case Player.Status.paused:
-                stationLabel.stringValue = player.stationName
-                songLabel.stringValue = ""
-
-            case Player.Status.connecting:
-                stationLabel.stringValue = player.stationName
-                songLabel.stringValue = NSLocalizedString("Connecting…", comment: "Station label text")
-
-            case Player.Status.playing:
-                // Naviola: show structured metadata for Navidrome tracks
-                if let track = player.station as? NavidromeTrack {
-                    songLabel.stringValue = track.title
-                    var detail = [String]()
-                    if let artist = track.artist { detail.append(artist) }
-                    if let album = track.albumTitle { detail.append(album) }
-                    stationLabel.stringValue = detail.joined(separator: " — ")
-                } else {
-                    stationLabel.stringValue = player.stationName
-                    songLabel.stringValue = player.songTitle
-                }
-        }
-
-        stationLabel.toolTip = stationLabel.stringValue
-        songLabel.toolTip = songLabel.stringValue
-
-        switch player.status {
-            case Player.Status.paused:
-                playButton.image = NSImage(named: NSImage.Name("NSTouchBarPlayTemplate"))
-                playButton.image?.isTemplate = true
-                playButton.toolTip = NSLocalizedString("Play", comment: "Toolbar button toolTip")
-
-            case Player.Status.connecting:
-                playButton.image = NSImage(named: NSImage.Name("NSTouchBarPauseTemplate"))
-                playButton.image?.isTemplate = true
-                playButton.toolTip = NSLocalizedString("Pause", comment: "Toolbar button toolTip")
-
-            case Player.Status.playing:
-                playButton.image = NSImage(named: NSImage.Name("NSTouchBarPauseTemplate"))
-                playButton.image?.isTemplate = true
-                playButton.toolTip = NSLocalizedString("Pause", comment: "Toolbar button toolTip")
-        }
-
+        // Toggle between two-line and single-line display
+        let hasSong = !songLabel.stringValue.isEmpty
         onlyStationLabel.stringValue = stationLabel.stringValue
-        onlyStationLabel.isVisible = songLabel.stringValue.isEmpty
-        songLabel.isVisible = !onlyStationLabel.isVisible
-        stationLabel.isVisible = !onlyStationLabel.isVisible
+        onlyStationLabel.isHidden = hasSong
+        songLabel.isHidden = !hasSong
+        stationLabel.isHidden = !hasSong
 
-        // Naviola: update skip button visibility and state
+        // Skip buttons: show only when queue is active
         let queue = NaviolaPlayQueue.shared
         prevButton.isHidden = !queue.isActive
         nextButton.isHidden = !queue.isActive
@@ -185,16 +177,11 @@ class ToolbarPlayView: NSViewController {
         nextButton.isEnabled = queue.currentIndex + 1 < queue.tracks.count || queue.repeatMode != .off
     }
 
-    /* ****************************************
-     *
-     * ****************************************/
     @objc private func togglePlay() {
-        // Naviola: tell play queue this is a user-initiated pause
         if player.isPlaying { NaviolaPlayQueue.shared.userPause() }
         player.toggle()
     }
 
-    // Naviola: skip/back actions
     @objc private func previousTrack() {
         NaviolaPlayQueue.shared.previous()
     }

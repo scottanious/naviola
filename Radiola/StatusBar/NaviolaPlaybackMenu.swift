@@ -37,6 +37,7 @@ fileprivate class NaviolaPlaybackView: NSView {
     private let positionLabel = Label()
     private let repeatButton = ControlButton(systemSymbolName: "repeat")
     private let shuffleButton = ControlButton(systemSymbolName: "shuffle")
+    private var updateTimer: Timer?
 
     init() {
         super.init(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
@@ -106,9 +107,18 @@ fileprivate class NaviolaPlaybackView: NSView {
                                                name: Notification.Name.PlayerStatusChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(refresh),
                                                name: Notification.Name.PlayerMetadataChanged, object: nil)
+
+        // Update time display every second while visible
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshTime()
+        }
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    deinit {
+        updateTimer?.invalidate()
+    }
 
     @objc private func refresh() {
         let queue = NaviolaPlayQueue.shared
@@ -116,16 +126,7 @@ fileprivate class NaviolaPlaybackView: NSView {
         prevButton.isEnabled = queue.currentIndex > 0
         nextButton.isEnabled = queue.currentIndex + 1 < queue.tracks.count || queue.repeatMode != .off
 
-        // Time: "1:23 / 3:45"
-        if let track = queue.currentTrack, let duration = track.duration, duration > 0,
-           let startTime = queue.trackStartTime {
-            let elapsed = min(Int(Date().timeIntervalSince(startTime)), duration)
-            timeLabel.stringValue = "\(formatTime(elapsed)) / \(formatTime(duration))"
-        } else if let track = queue.currentTrack, let duration = track.duration, duration > 0 {
-            timeLabel.stringValue = "0:00 / \(formatTime(duration))"
-        } else {
-            timeLabel.stringValue = ""
-        }
+        refreshTime()
 
         // Position: "2/15"
         if queue.isActive {
@@ -150,6 +151,19 @@ fileprivate class NaviolaPlaybackView: NSView {
         // Shuffle
         shuffleButton.image = NSImage(systemSymbolName: "shuffle", accessibilityDescription: "Shuffle")
         shuffleButton.contentTintColor = queue.shuffleEnabled ? .controlAccentColor : .tertiaryLabelColor
+    }
+
+    private func refreshTime() {
+        let queue = NaviolaPlayQueue.shared
+        if let track = queue.currentTrack, let duration = track.duration, duration > 0,
+           let startTime = queue.trackStartTime {
+            let elapsed = min(Int(Date().timeIntervalSince(startTime)), duration)
+            timeLabel.stringValue = "\(formatTime(elapsed)) / \(formatTime(duration))"
+        } else if let track = queue.currentTrack, let duration = track.duration, duration > 0 {
+            timeLabel.stringValue = "0:00 / \(formatTime(duration))"
+        } else {
+            timeLabel.stringValue = ""
+        }
     }
 
     private func formatTime(_ seconds: Int) -> String {

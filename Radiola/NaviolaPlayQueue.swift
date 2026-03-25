@@ -38,15 +38,18 @@ class NaviolaPlayQueue: ObservableObject {
         return tracks[currentIndex]
     }
 
-    /// Set when we're intentionally switching tracks — prevents the observer
-    /// from treating the intermediate stop() as a track-end event.
-    private var isChangingTrack = false
-
     /// When the current track started playing.
     private(set) var trackStartTime: Date?
 
     /// Set by userPause() to prevent auto-advance when user explicitly pauses.
     private var userDidPause = false
+
+    /// Incremented each time we start a new track. Used to ignore stale
+    /// .paused notifications from previous tracks arriving out of order.
+    private var playGeneration: Int = 0
+
+    /// Whether the current generation has confirmed .playing state.
+    private var confirmedPlaying = false
 
     init() {
         NotificationCenter.default.addObserver(
@@ -59,18 +62,24 @@ class NaviolaPlayQueue: ObservableObject {
 
     // MARK: - Playback Control
 
+    /// Start a new track — increments generation to ignore stale notifications.
+    private func startTrack(at index: Int) {
+        currentIndex = index
+        playGeneration += 1
+        confirmedPlaying = false
+        trackStartTime = nil
+        userDidPause = false
+
+        player.station = tracks[index]
+        player.play()
+    }
+
     /// Load tracks and start playing from the given index.
     func playTracks(_ tracks: [NavidromeTrack], startingAt index: Int = 0) {
         guard !tracks.isEmpty, index < tracks.count else { return }
 
         self.tracks = tracks
-        self.currentIndex = index
-        isChangingTrack = true
-        userDidPause = false
-        trackStartTime = nil
-
-        player.station = tracks[index]
-        player.play()
+        startTrack(at: index)
     }
 
     /// Resolve a pinned item to tracks via Subsonic API and play.
@@ -94,7 +103,6 @@ class NaviolaPlayQueue: ObservableObject {
     }
 
     /// Call this when the user explicitly pauses/stops playback.
-    /// Prevents auto-advance from firing.
     func userPause() {
         userDidPause = true
     }
@@ -104,14 +112,9 @@ class NaviolaPlayQueue: ObservableObject {
     func next() -> Bool {
         guard isActive else { return false }
 
-        userDidPause = false
-
         // Repeat one: replay the same track
         if repeatMode == .one {
-            isChangingTrack = true
-            trackStartTime = nil
-            player.station = tracks[currentIndex]
-            player.play()
+            startTrack(at: currentIndex)
             return true
         }
 
@@ -121,42 +124,28 @@ class NaviolaPlayQueue: ObservableObject {
             while nextIndex == currentIndex {
                 nextIndex = Int.random(in: 0 ..< tracks.count)
             }
-            currentIndex = nextIndex
-            isChangingTrack = true
-            trackStartTime = nil
-            player.station = tracks[currentIndex]
-            player.play()
+            startTrack(at: nextIndex)
             return true
         }
 
         // Sequential: advance or loop
         if currentIndex + 1 < tracks.count {
-            currentIndex += 1
+            startTrack(at: currentIndex + 1)
+            return true
         } else if repeatMode == .all {
-            currentIndex = 0
+            startTrack(at: 0)
+            return true
         } else {
             stop()
             return false
         }
-
-        isChangingTrack = true
-        trackStartTime = nil
-        player.station = tracks[currentIndex]
-        player.play()
-        return true
     }
 
     /// Go to the previous track. Returns false if at start.
     @discardableResult
     func previous() -> Bool {
         guard isActive, currentIndex > 0 else { return false }
-
-        userDidPause = false
-        currentIndex -= 1
-        isChangingTrack = true
-        trackStartTime = nil
-        player.station = tracks[currentIndex]
-        player.play()
+        startTrack(at: currentIndex - 1)
         return true
     }
 
@@ -164,28 +153,30 @@ class NaviolaPlayQueue: ObservableObject {
     func stop() {
         tracks = []
         currentIndex = -1
-        isChangingTrack = false
         trackStartTime = nil
         userDidPause = false
+        confirmedPlaying = false
     }
 
     // MARK: - Auto-Advance
 
     @objc private func playerStatusChanged() {
+        let gen = playGeneration
+
         switch player.status {
         case .playing:
-            isChangingTrack = false
-            trackStartTime = Date()
-            userDidPause = false
+            // Only accept .playing for the current generation
+            if gen == playGeneration {
+                confirmedPlaying = true
+                trackStartTime = Date()
+                userDidPause = false
+            }
 
         case .connecting:
             break
 
         case .paused:
-            // Ignore if we're in the middle of a track switch
-            guard !isChangingTrack else { return }
-
-            // Nothing to advance if queue isn't active
+            // Ignore if queue isn't active
             guard isActive else { return }
 
             // User explicitly paused — don't advance
@@ -194,16 +185,33 @@ class NaviolaPlayQueue: ObservableObject {
                 return
             }
 
+            // Only advance if we confirmed this generation actually played.
+            // This prevents stale .paused from a previous track's stop()
+            // arriving after the new track's .playing.
+            guard confirmedPlaying else { return }
+
             // Verify this is still our track
             guard let current = currentTrack, player.station?.id == current.id else {
                 stop()
                 return
             }
 
-            // Track ended — advance after a brief delay for FFPlayer cleanup
+            // Must have played for at least 2 seconds (guards against rapid
+            // state transitions during track startup)
+            if let startTime = trackStartTime, Date().timeIntervalSince(startTime) < 2.0 {
+                return
+            }
+
+            // Track ended naturally — wait for audio buffers to drain before advancing.
+            // FFPlayer's decoder hits EOF before the audio queue finishes playing
+            // the last few seconds of buffered audio. A longer delay ensures the
+            // listener hears the full track.
             trackStartTime = nil
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.next()
+            confirmedPlaying = false
+            let expectedGen = playGeneration
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+                guard let self = self, self.playGeneration == expectedGen else { return }
+                self.next()
             }
         }
     }
