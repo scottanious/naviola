@@ -57,12 +57,15 @@ struct NavidromeClient {
     }
 
     /// Get a list of albums matching the given type (newest, recent, random, etc.).
-    func getAlbumList2(type: String, size: Int = 20, offset: Int = 0) async throws -> [SubsonicAlbumID3] {
-        let queryItems = [
+    func getAlbumList2(type: String, size: Int = 20, offset: Int = 0, genre: String? = nil) async throws -> [SubsonicAlbumID3] {
+        var queryItems = [
             URLQueryItem(name: "type", value: type),
             URLQueryItem(name: "size", value: String(size)),
             URLQueryItem(name: "offset", value: String(offset)),
         ]
+        if let genre = genre {
+            queryItems.append(URLQueryItem(name: "genre", value: genre))
+        }
 
         let response = try await fetch(SubsonicAlbumList2Response.self, path: "/rest/getAlbumList2.view", queryItems: queryItems)
 
@@ -71,6 +74,69 @@ struct NavidromeClient {
         }
 
         return response.response.albumList2?.album ?? []
+    }
+
+    /// Get all artists grouped by letter.
+    func getArtists() async throws -> [SubsonicArtistIndex] {
+        let response = try await fetch(SubsonicArtistsResponse.self, path: "/rest/getArtists")
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        return response.response.artists?.index ?? []
+    }
+
+    /// Get an artist's albums.
+    func getArtist(id: String) async throws -> SubsonicArtistWithAlbums {
+        let queryItems = [URLQueryItem(name: "id", value: id)]
+        let response = try await fetch(SubsonicArtistDetailResponse.self, path: "/rest/getArtist", queryItems: queryItems)
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        guard let artist = response.response.artist else {
+            throw NavidromeClientError.missingPayload("artist")
+        }
+        return artist
+    }
+
+    /// Get all genres.
+    func getGenres() async throws -> [SubsonicGenre] {
+        let response = try await fetch(SubsonicGenresResponse.self, path: "/rest/getGenres")
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        return response.response.genres?.genre ?? []
+    }
+
+    /// Get all playlists.
+    func getPlaylists() async throws -> [SubsonicPlaylist] {
+        let response = try await fetch(SubsonicPlaylistsResponse.self, path: "/rest/getPlaylists")
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        return response.response.playlists?.playlist ?? []
+    }
+
+    /// Get a playlist's tracks.
+    func getPlaylist(id: String) async throws -> SubsonicPlaylistWithEntries {
+        let queryItems = [URLQueryItem(name: "id", value: id)]
+        let response = try await fetch(SubsonicPlaylistDetailResponse.self, path: "/rest/getPlaylist", queryItems: queryItems)
+
+        if let error = response.response.error {
+            throw NavidromeClientError.serverError(code: error.code, message: error.message)
+        }
+
+        guard let playlist = response.response.playlist else {
+            throw NavidromeClientError.missingPayload("playlist")
+        }
+        return playlist
     }
 
     /// Get a single album with its tracks.
@@ -92,13 +158,19 @@ struct NavidromeClient {
         return album
     }
 
-    /// Search for albums by query string.
+    /// Search for albums by query string (albums only).
     func search3(query: String, albumCount: Int = 20) async throws -> [SubsonicAlbumID3] {
+        let result = try await search3Full(query: query, albumCount: albumCount, artistCount: 0, songCount: 0)
+        return result.album ?? []
+    }
+
+    /// Full search returning artists, albums, and songs.
+    func search3Full(query: String, albumCount: Int = 20, artistCount: Int = 10, songCount: Int = 20) async throws -> SubsonicSearchResult {
         let queryItems = [
             URLQueryItem(name: "query", value: query),
             URLQueryItem(name: "albumCount", value: String(albumCount)),
-            URLQueryItem(name: "songCount", value: "0"),
-            URLQueryItem(name: "artistCount", value: "0"),
+            URLQueryItem(name: "artistCount", value: String(artistCount)),
+            URLQueryItem(name: "songCount", value: String(songCount)),
         ]
 
         let response = try await fetch(SubsonicSearch3Response.self, path: "/rest/search3.view", queryItems: queryItems)
@@ -107,7 +179,12 @@ struct NavidromeClient {
             throw NavidromeClientError.serverError(code: error.code, message: error.message)
         }
 
-        return response.response.searchResult3?.album ?? []
+        if let result = response.response.searchResult3 {
+            return result
+        }
+        // Return empty result — can't construct SubsonicSearchResult (no init) so return via decode
+        let emptyData = "{\"artist\":[],\"album\":[],\"song\":[]}".data(using: .utf8)!
+        return try JSONDecoder().decode(SubsonicSearchResult.self, from: emptyData)
     }
 
     // MARK: - URL Builders (no network call)

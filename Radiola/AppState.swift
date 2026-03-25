@@ -78,14 +78,15 @@ class AppState: ObservableObject {
         InternetStationList(title: NSLocalizedString("By country", comment: "Internet station list"), icon: "globe", provider: RadioBrowserProvider(.byCountry)),
     ]
 
-    // Naviola: Navidrome album browsing lists
+    // Naviola: Navidrome browsing categories (Pinned first)
     @Published var navidromeStations: [NavidromeAlbumList] = [
-        NavidromeAlbumList(title: NSLocalizedString("Recently Added", comment: "Navidrome station list"), icon: "music.note.list", provider: NavidromeProvider(.recentlyAdded)),
-        NavidromeAlbumList(title: NSLocalizedString("Search", comment: "Navidrome station list"), icon: "magnifyingglass", provider: NavidromeProvider(.search)),
+        NavidromeAlbumList(title: NSLocalizedString("Pinned", comment: "Navidrome category"), icon: "pin.fill", provider: NavidromeProvider(.pinned)),
+        NavidromeAlbumList(title: NSLocalizedString("Albums", comment: "Navidrome category"), icon: "square.stack", provider: NavidromeProvider(.albums)),
+        NavidromeAlbumList(title: NSLocalizedString("Artists", comment: "Navidrome category"), icon: "music.mic", provider: NavidromeProvider(.artists)),
+        NavidromeAlbumList(title: NSLocalizedString("Genres", comment: "Navidrome category"), icon: "guitars", provider: NavidromeProvider(.genres)),
+        NavidromeAlbumList(title: NSLocalizedString("Playlists", comment: "Navidrome category"), icon: "music.note.list", provider: NavidromeProvider(.playlists)),
+        NavidromeAlbumList(title: NSLocalizedString("Search", comment: "Navidrome category"), icon: "magnifyingglass", provider: NavidromeProvider(.search)),
     ]
-
-    // Naviola: Pinned items list (shows in sidebar under "Pinned")
-    let naviolaPinnedList = NavidromeAlbumList(title: NSLocalizedString("Pinned", comment: "Sidebar item"), icon: "pin.fill", provider: NavidromeProvider(.pinned))
 
     public var history = History()
 

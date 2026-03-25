@@ -77,6 +77,52 @@ class NavidromeAlbum: Identifiable {
     }
 }
 
+// MARK: - NavidromeBrowseItem (for Artists, Genres, Playlists)
+
+/// A browseable category item that can expand into albums or tracks.
+class NavidromeBrowseItem: Identifiable {
+    let id = UUID()
+    var title: String
+    var subtitle: String?
+    var navidromeId: String
+    var coverArtId: String?
+
+    /// Expanded children — albums for artists/genres, tracks for playlists.
+    var albums: [NavidromeAlbum] = []
+    var tracks: [NavidromeTrack] = []
+    var childrenLoaded: Bool = false
+
+    enum ItemType { case artist, genre, playlist }
+    let itemType: ItemType
+
+    init(title: String, navidromeId: String, itemType: ItemType, subtitle: String? = nil, coverArtId: String? = nil) {
+        self.title = title
+        self.navidromeId = navidromeId
+        self.itemType = itemType
+        self.subtitle = subtitle
+        self.coverArtId = coverArtId
+    }
+
+    /// Load children from the server.
+    @MainActor func loadChildren() async throws {
+        guard !childrenLoaded, let client = NaviolaSettings.shared.makeClient() else { return }
+        let provider = NavidromeProvider(.albums) // just need the client methods
+
+        switch itemType {
+        case .artist:
+            let artistAlbums = try await provider.fetchAlbumsForArtist(navidromeId)
+            albums = artistAlbums.map { NavidromeAlbum(from: $0) }
+        case .genre:
+            let genreAlbums = try await provider.fetchAlbumsForGenre(title)
+            albums = genreAlbums.map { NavidromeAlbum(from: $0) }
+        case .playlist:
+            let entries = try await provider.fetchPlaylistTracks(navidromeId)
+            tracks = entries.map { NavidromeTrack(from: $0, client: client) }
+        }
+        childrenLoaded = true
+    }
+}
+
 // MARK: - NavidromeAlbumList
 
 class NavidromeAlbumList: ObservableObject {
@@ -85,6 +131,7 @@ class NavidromeAlbumList: ObservableObject {
     let icon: String
 
     var items = [NavidromeAlbum]()
+    var browseItems = [NavidromeBrowseItem]()
 
     enum State {
         case notLoaded
@@ -112,8 +159,161 @@ class NavidromeAlbumList: ObservableObject {
         }
 
         do {
-            let albums = try await provider.fetch()
-            items = albums.map { NavidromeAlbum(from: $0) }
+            switch provider.category {
+            case .albums:
+                let albums = try await provider.fetchAlbums()
+                items = albums.map { NavidromeAlbum(from: $0) }
+                browseItems = []
+
+            case .search:
+                guard let client = NaviolaSettings.shared.makeClient() else { break }
+                let scope = provider.searchScope
+
+                let artistCount = (scope == .all || scope == .artists) ? 20 : 0
+                let albumCount = (scope == .all || scope == .albums) ? 30 : 0
+                let songCount = (scope == .all || scope == .songs) ? 30 : 0
+
+                let result = try await client.search3Full(
+                    query: provider.searchText,
+                    albumCount: albumCount,
+                    artistCount: artistCount,
+                    songCount: songCount
+                )
+
+                // Artists as browse items
+                var searchBrowseItems = [NavidromeBrowseItem]()
+                for artist in result.artist ?? [] {
+                    searchBrowseItems.append(NavidromeBrowseItem(
+                        title: artist.name,
+                        navidromeId: artist.id,
+                        itemType: .artist,
+                        subtitle: artist.albumCount.map { "\($0) albums" },
+                        coverArtId: artist.coverArt
+                    ))
+                }
+
+                // Songs as a "Songs" browse item (or top-level tracks for songs-only scope)
+                let songs = (result.song ?? []).map { NavidromeTrack(from: $0, client: client) }
+                if !songs.isEmpty {
+                    let songsItem = NavidromeBrowseItem(
+                        title: NSLocalizedString("Songs", comment: "Search results section"),
+                        navidromeId: "_search_songs",
+                        itemType: .playlist,
+                        subtitle: "\(songs.count) results"
+                    )
+                    songsItem.tracks = songs
+                    songsItem.childrenLoaded = true
+                    searchBrowseItems.append(songsItem)
+                }
+
+                // Playlists (client-side filter — search3 doesn't include playlists)
+                if scope == .all || scope == .playlists {
+                    let query = provider.searchText.lowercased()
+                    let allPlaylists = try await client.getPlaylists()
+                    let matched = allPlaylists.filter { $0.name.lowercased().contains(query) }
+                    for playlist in matched {
+                        let durationStr = playlist.duration.map { d in
+                            let m = d / 60
+                            return m > 60 ? "\(m / 60)h \(m % 60)m" : "\(m)m"
+                        }
+                        searchBrowseItems.append(NavidromeBrowseItem(
+                            title: playlist.name,
+                            navidromeId: playlist.id,
+                            itemType: .playlist,
+                            subtitle: [
+                                playlist.songCount.map { "\($0) songs" },
+                                durationStr,
+                            ].compactMap { $0 }.joined(separator: " · "),
+                            coverArtId: playlist.coverArt
+                        ))
+                    }
+                }
+
+                browseItems = searchBrowseItems
+                items = (result.album ?? []).map { NavidromeAlbum(from: $0) }
+
+            case .pinned:
+                let store = NaviolaPinnedItemStore.shared
+                // Albums
+                let albumPins = store.items.filter { $0.type == .album }
+                items = albumPins.map { pin in
+                    let parts = pin.title.components(separatedBy: " - ")
+                    let artist = parts.count > 1 ? parts.first : nil
+                    let albumName = parts.count > 1 ? parts.dropFirst().joined(separator: " - ") : pin.title
+                    let album = NavidromeAlbum(title: albumName, navidromeId: pin.subsonicId)
+                    album.artist = artist
+                    album.coverArtId = pin.coverArtId
+                    return album
+                }
+                // Non-album pins (artists, genres, playlists)
+                browseItems = store.items.filter { $0.type != .album }.map { pin in
+                    let itemType: NavidromeBrowseItem.ItemType
+                    switch pin.type {
+                    case .artist: itemType = .artist
+                    case .genre: itemType = .genre
+                    case .playlist: itemType = .playlist
+                    default: itemType = .playlist // fallback
+                    }
+                    return NavidromeBrowseItem(
+                        title: pin.title,
+                        navidromeId: pin.subsonicId,
+                        itemType: itemType,
+                        subtitle: pin.subtitle,
+                        coverArtId: pin.coverArtId
+                    )
+                }
+
+            case .artists:
+                let indices = try await provider.fetchArtists()
+                browseItems = indices.flatMap { index in
+                    index.artist.map { artist in
+                        NavidromeBrowseItem(
+                            title: artist.name,
+                            navidromeId: artist.id,
+                            itemType: .artist,
+                            subtitle: artist.albumCount.map { "\($0) albums" },
+                            coverArtId: artist.coverArt
+                        )
+                    }
+                }
+                items = []
+
+            case .genres:
+                let genres = try await provider.fetchGenres()
+                browseItems = genres.map { genre in
+                    NavidromeBrowseItem(
+                        title: genre.value,
+                        navidromeId: genre.value, // genres are referenced by name
+                        itemType: .genre,
+                        subtitle: [
+                            genre.albumCount.map { "\($0) albums" },
+                            genre.songCount.map { "\($0) songs" },
+                        ].compactMap { $0 }.joined(separator: " · ")
+                    )
+                }
+                items = []
+
+            case .playlists:
+                let playlists = try await provider.fetchPlaylists()
+                browseItems = playlists.map { playlist in
+                    let durationStr = playlist.duration.map { d in
+                        let m = d / 60
+                        return m > 60 ? "\(m / 60)h \(m % 60)m" : "\(m)m"
+                    }
+                    return NavidromeBrowseItem(
+                        title: playlist.name,
+                        navidromeId: playlist.id,
+                        itemType: .playlist,
+                        subtitle: [
+                            playlist.songCount.map { "\($0) songs" },
+                            durationStr,
+                        ].compactMap { $0 }.joined(separator: " · "),
+                        coverArtId: playlist.coverArt
+                    )
+                }
+                items = []
+            }
+
             state = .loaded
         } catch {
             state = .error

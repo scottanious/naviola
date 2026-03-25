@@ -28,6 +28,9 @@ class ToolbarPlayView: NSViewController {
     private let timeLabel = Label()
     private var isSeeking = false
 
+    // Dynamic constraint for label trailing (active only when queue controls visible)
+    private var songLabelQueueConstraint: NSLayoutConstraint?
+
     private var progressTimer: Timer?
 
     override func loadView() {
@@ -123,6 +126,7 @@ class ToolbarPlayView: NSViewController {
             btn.imagePosition = .imageOnly
             btn.isBordered = false
             btn.imageScaling = .scaleProportionallyDown
+            btn.refusesFirstResponder = true
         }
 
         repeatButton.target = self
@@ -218,10 +222,10 @@ class ToolbarPlayView: NSViewController {
             repeatButton.widthAnchor.constraint(equalToConstant: smallBtnSize),
             repeatButton.heightAnchor.constraint(equalToConstant: smallBtnSize),
 
-            // Labels trail before mode buttons
-            songLabel.trailingAnchor.constraint(lessThanOrEqualTo: repeatButton.leadingAnchor, constant: -10),
+            // Labels extend to view edge; constrained by mode buttons when visible
+            songLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
             stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
-            onlyStationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
+            onlyStationLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
 
             // Row 2: Seekable slider + time label (below transport)
             progressSlider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
@@ -234,6 +238,9 @@ class ToolbarPlayView: NSViewController {
 
             progressSlider.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -4),
         ])
+
+        // Dynamic constraint: limit label trailing to repeat button when queue is active
+        songLabelQueueConstraint = songLabel.trailingAnchor.constraint(lessThanOrEqualTo: repeatButton.leadingAnchor, constant: -10)
     }
 
     // MARK: - Refresh
@@ -276,10 +283,11 @@ class ToolbarPlayView: NSViewController {
         songLabel.isHidden = !hasSong
         stationLabel.isHidden = !hasSong
 
-        // Skip buttons
+        // Skip/mode buttons and label constraint
         let queue = NaviolaPlayQueue.shared
         prevButton.isHidden = !queue.isActive
         nextButton.isHidden = !queue.isActive
+        songLabelQueueConstraint?.isActive = queue.isActive
         prevButton.isEnabled = queue.currentIndex > 0
         nextButton.isEnabled = queue.currentIndex + 1 < queue.tracks.count || queue.repeatMode != .off
 

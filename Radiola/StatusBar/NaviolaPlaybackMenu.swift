@@ -40,7 +40,7 @@ fileprivate class NaviolaPlaybackView: NSView {
     private var updateTimer: Timer?
 
     init() {
-        super.init(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
+        super.init(frame: NSRect(x: 0, y: 0, width: 360, height: 28))
         autoresizingMask = [.width]
 
         for v in [prevButton, nextButton, timeLabel, positionLabel, repeatButton, shuffleButton] {
@@ -67,7 +67,7 @@ fileprivate class NaviolaPlaybackView: NSView {
         positionLabel.alignment = .center
         positionLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
 
-        let iconSize: CGFloat = 10
+        let iconSize: CGFloat = 16
 
         NSLayoutConstraint.activate([
             // Left group: skip buttons

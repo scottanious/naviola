@@ -88,13 +88,39 @@ class NaviolaPlayQueue: ObservableObject {
 
         Task { @MainActor in
             do {
+                var allTracks = [NavidromeTrack]()
+
                 switch item.type {
                 case .album:
                     let albumDetail = try await client.getAlbum(id: item.subsonicId)
-                    let tracks = (albumDetail.song ?? []).map { NavidromeTrack(from: $0, client: client) }
-                    playTracks(tracks)
-                default:
-                    break
+                    allTracks = (albumDetail.song ?? []).map { NavidromeTrack(from: $0, client: client) }
+
+                case .artist:
+                    let artist = try await client.getArtist(id: item.subsonicId)
+                    for album in artist.album ?? [] {
+                        let detail = try await client.getAlbum(id: album.id)
+                        allTracks.append(contentsOf: (detail.song ?? []).map { NavidromeTrack(from: $0, client: client) })
+                    }
+
+                case .playlist:
+                    let playlist = try await client.getPlaylist(id: item.subsonicId)
+                    allTracks = (playlist.entry ?? []).map { NavidromeTrack(from: $0, client: client) }
+
+                case .genre:
+                    let albums = try await client.getAlbumList2(type: "byGenre", size: 50, genre: item.subsonicId)
+                    for album in albums {
+                        let detail = try await client.getAlbum(id: album.id)
+                        allTracks.append(contentsOf: (detail.song ?? []).map { NavidromeTrack(from: $0, client: client) })
+                    }
+
+                case .track:
+                    // Single track — just play it directly
+                    let track = NavidromeTrack(title: item.title, url: client.streamURL(songId: item.subsonicId).absoluteString, navidromeId: item.subsonicId)
+                    allTracks = [track]
+                }
+
+                if !allTracks.isEmpty {
+                    playTracks(allTracks)
                 }
             } catch {
                 warning("Failed to resolve pinned item \(item.title): \(error)")

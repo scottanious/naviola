@@ -93,10 +93,6 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
         }
 
-        // Naviola: Pinned items section
-        sideBar.addGroup(title: NSLocalizedString("Pinned", comment: "Sidebar group"))
-        sideBar.addItem(id: appState.naviolaPinnedList.id, title: appState.naviolaPinnedList.title, icon: appState.naviolaPinnedList.icon)
-
         sideBar.addGroup(title: NSLocalizedString("Radio browser", comment: "Sidebar group"))
         for list in appState.internetStations {
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
@@ -343,12 +339,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             updateStateIndicator(state: list.state)
         } else if let list = AppState.shared.navidromeStations.find(byId: listId) {
             setNavidromeStationList(list: list)
-            setFocus(listId: listId, toTree: !list.items.isEmpty)
-            updateNavidromeStateIndicator(state: list.state)
-        } else if listId == AppState.shared.naviolaPinnedList.id {
-            let list = AppState.shared.naviolaPinnedList
-            setNavidromeStationList(list: list)
-            setFocus(listId: listId, toTree: !list.items.isEmpty)
+            setFocus(listId: listId, toTree: !list.items.isEmpty || !list.browseItems.isEmpty)
             updateNavidromeStateIndicator(state: list.state)
         }
     }
@@ -520,7 +511,10 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             return
         }
 
-        switch (state, list.items.isEmpty) {
+        // Check both items and browseItems for emptiness
+        let hasContent = !list.items.isEmpty || !list.browseItems.isEmpty
+
+        switch (state, hasContent) {
         case (.notLoaded, _):
             stateIndicator.isHidden = true
             stateIndicatorSpinner.stopAnimation(nil)
@@ -537,13 +531,13 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             stateIndicatorSpinner.stopAnimation(nil)
             stateIndicatorSpinner.isHidden = true
 
-        case (.loaded, true):
+        case (.loaded, false): // loaded but empty
             stateIndicatorSpinner.stopAnimation(nil)
             stateIndicatorSpinner.isHidden = true
             stateIndicator.isHidden = false
             stateIndicatorText.stringValue = NSLocalizedString("No results", comment: "Navidrome placeholder")
 
-        case (.loaded, false):
+        case (.loaded, true): // loaded with content
             stateIndicatorSpinner.stopAnimation(nil)
             stateIndicator.isHidden = true
         }
@@ -600,18 +594,42 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
     @objc func doubleClickRow(sender: AnyObject) {
         let clickedItem = stationsTree.item(atRow: stationsTree.clickedRow)
 
-        // Naviola: double-click a track in an album → load album into play queue
+        // Naviola: double-click a track → load parent's tracks into play queue
         if let track = clickedItem as? NavidromeTrack {
             if player.station?.id == track.id && player.isPlaying { return }
 
-            // Find parent album and start queue from this track
-            if let album = stationsTree.parent(forItem: track) as? NavidromeAlbum,
+            let parent = stationsTree.parent(forItem: track)
+
+            // Parent is an album
+            if let album = parent as? NavidromeAlbum,
                !album.tracks.isEmpty,
                let trackIndex = album.tracks.firstIndex(where: { $0.id == track.id }) {
                 NaviolaPlayQueue.shared.playTracks(album.tracks, startingAt: trackIndex)
-            } else {
+            }
+            // Parent is a browse item (playlist)
+            else if let browseItem = parent as? NavidromeBrowseItem,
+                    !browseItem.tracks.isEmpty,
+                    let trackIndex = browseItem.tracks.firstIndex(where: { $0.id == track.id }) {
+                NaviolaPlayQueue.shared.playTracks(browseItem.tracks, startingAt: trackIndex)
+            }
+            else {
                 player.station = track
                 player.play()
+            }
+            return
+        }
+
+        // Naviola: double-click a browse item (playlist) → play all tracks
+        if let browseItem = clickedItem as? NavidromeBrowseItem, browseItem.itemType == .playlist {
+            Task { @MainActor in
+                do {
+                    try await browseItem.loadChildren()
+                    if !browseItem.tracks.isEmpty {
+                        NaviolaPlayQueue.shared.playTracks(browseItem.tracks)
+                    }
+                } catch {
+                    warning("Failed to load tracks for \(browseItem.title): \(error)")
+                }
             }
             return
         }

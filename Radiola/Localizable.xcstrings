@@ -360,6 +360,12 @@
         }
       }
     },
+    "Albums" : {
+      "comment" : "Navidrome category\nSearch scope"
+    },
+    "All" : {
+      "comment" : "Search scope"
+    },
     "Are you sure you want to continue?" : {
       "comment" : "Merger dialog message",
       "localizations" : {
@@ -743,6 +749,12 @@
         }
       }
     },
+    "Artists" : {
+      "comment" : "Navidrome category\nSearch scope"
+    },
+    "By Artist" : {
+      "comment" : "Album sort mode"
+    },
     "By country" : {
       "comment" : "Internet station list",
       "localizations" : {
@@ -800,6 +812,9 @@
           }
         }
       }
+    },
+    "By Name" : {
+      "comment" : "Album sort mode"
     },
     "By tag" : {
       "comment" : "Internet station list",
@@ -1285,6 +1300,9 @@
         }
       }
     },
+    "Genres" : {
+      "comment" : "Navidrome category"
+    },
     "Group name" : {
       "comment" : "Station group placeholder",
       "localizations" : {
@@ -1651,6 +1669,9 @@
         }
       }
     },
+    "Most Played" : {
+      "comment" : "Album sort mode"
+    },
     "Mute" : {
       "comment" : "Mute button tooltip\nStatus bar menu Item",
       "localizations" : {
@@ -1949,6 +1970,9 @@
         }
       }
     },
+    "Pin" : {
+      "comment" : "Context menu\nPin button tooltip"
+    },
     "Pin album" : {
       "comment" : "Pin button tooltip"
     },
@@ -1956,7 +1980,7 @@
       "comment" : "Context menu"
     },
     "Pinned" : {
-      "comment" : "Sidebar group\nSidebar item\nStatus bar menu section"
+      "comment" : "Navidrome category\nStatus bar menu section"
     },
     "Pinned — click to unpin" : {
       "comment" : "Pin button tooltip"
@@ -1994,6 +2018,15 @@
     "Play Album" : {
       "comment" : "Context menu"
     },
+    "Play Artist" : {
+      "comment" : "Context menu"
+    },
+    "Play Genre" : {
+      "comment" : "Context menu"
+    },
+    "Play Playlist" : {
+      "comment" : "Context menu"
+    },
     "playing now" : {
       "comment" : "History window song status",
       "localizations" : {
@@ -2022,6 +2055,9 @@
           }
         }
       }
+    },
+    "Playlists" : {
+      "comment" : "Navidrome category\nSearch scope"
     },
     "Quit" : {
       "comment" : "Status bar menu item",
@@ -2104,8 +2140,14 @@
         }
       }
     },
+    "Random" : {
+      "comment" : "Album sort mode"
+    },
     "Recently Added" : {
-      "comment" : "Navidrome station list"
+      "comment" : "Album sort mode"
+    },
+    "Recently Played" : {
+      "comment" : "Album sort mode"
     },
     "Refresh" : {
       "comment" : "Navidrome search panel"
@@ -2140,9 +2182,9 @@
       }
     },
     "Search" : {
-      "comment" : "Navidrome station list"
+      "comment" : "Navidrome category"
     },
-    "Search albums..." : {
+    "Search..." : {
       "comment" : "Navidrome search placeholder"
     },
     "Settings…" : {
@@ -2203,6 +2245,9 @@
           }
         }
       }
+    },
+    "Songs" : {
+      "comment" : "Search results section\nSearch scope"
     },
     "Sorry, I couldn't play \"%@\"." : {
       "comment" : "Player error title. %@ is a station name",
@@ -2802,6 +2847,9 @@
           }
         }
       }
+    },
+    "Unpin" : {
+      "comment" : "Context menu"
     },
     "Unpin Album" : {
       "comment" : "Context menu"

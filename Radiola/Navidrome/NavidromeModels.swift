@@ -130,14 +130,165 @@ struct SubsonicSearch3Response: Decodable {
         let status: String
         let version: String
         let error: SubsonicError?
-        let searchResult3: SubsonicSearchResult3?
+        let searchResult3: SubsonicSearchResult?
+
+        var isOk: Bool { status == "ok" }
+    }
+}
+
+struct SubsonicSearchResult: Decodable {
+    let artist: [SubsonicArtistID3]?
+    let album: [SubsonicAlbumID3]?
+    let song: [SubsonicChild]?
+}
+
+// MARK: - getArtists Response
+
+struct SubsonicArtistsResponse: Decodable {
+    let response: SubsonicArtistsInner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicArtistsInner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let artists: SubsonicArtistsContainer?
 
         var isOk: Bool { status == "ok" }
     }
 
-    struct SubsonicSearchResult3: Decodable {
-        let album: [SubsonicAlbumID3]?
+    struct SubsonicArtistsContainer: Decodable {
+        let index: [SubsonicArtistIndex]?
     }
+}
+
+struct SubsonicArtistIndex: Decodable {
+    let name: String
+    let artist: [SubsonicArtistID3]
+}
+
+struct SubsonicArtistID3: Decodable, Identifiable {
+    let id: String
+    let name: String
+    let albumCount: Int?
+    let coverArt: String?
+}
+
+// MARK: - getArtist Response
+
+struct SubsonicArtistDetailResponse: Decodable {
+    let response: SubsonicArtistDetailInner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicArtistDetailInner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let artist: SubsonicArtistWithAlbums?
+
+        var isOk: Bool { status == "ok" }
+    }
+}
+
+struct SubsonicArtistWithAlbums: Decodable {
+    let id: String
+    let name: String
+    let albumCount: Int?
+    let coverArt: String?
+    let album: [SubsonicAlbumID3]?
+}
+
+// MARK: - getGenres Response
+
+struct SubsonicGenresResponse: Decodable {
+    let response: SubsonicGenresInner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicGenresInner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let genres: SubsonicGenresContainer?
+
+        var isOk: Bool { status == "ok" }
+    }
+
+    struct SubsonicGenresContainer: Decodable {
+        let genre: [SubsonicGenre]?
+    }
+}
+
+struct SubsonicGenre: Decodable {
+    let value: String
+    let songCount: Int?
+    let albumCount: Int?
+}
+
+// MARK: - getPlaylists Response
+
+struct SubsonicPlaylistsResponse: Decodable {
+    let response: SubsonicPlaylistsInner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicPlaylistsInner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let playlists: SubsonicPlaylistsContainer?
+
+        var isOk: Bool { status == "ok" }
+    }
+
+    struct SubsonicPlaylistsContainer: Decodable {
+        let playlist: [SubsonicPlaylist]?
+    }
+}
+
+struct SubsonicPlaylist: Decodable, Identifiable {
+    let id: String
+    let name: String
+    let songCount: Int?
+    let duration: Int?
+    let coverArt: String?
+}
+
+// MARK: - getPlaylist Response
+
+struct SubsonicPlaylistDetailResponse: Decodable {
+    let response: SubsonicPlaylistDetailInner
+
+    enum CodingKeys: String, CodingKey {
+        case response = "subsonic-response"
+    }
+
+    struct SubsonicPlaylistDetailInner: Decodable {
+        let status: String
+        let version: String
+        let error: SubsonicError?
+        let playlist: SubsonicPlaylistWithEntries?
+
+        var isOk: Bool { status == "ok" }
+    }
+}
+
+struct SubsonicPlaylistWithEntries: Decodable {
+    let id: String
+    let name: String
+    let songCount: Int?
+    let duration: Int?
+    let entry: [SubsonicChild]?
 }
 
 // MARK: - getAlbum Response

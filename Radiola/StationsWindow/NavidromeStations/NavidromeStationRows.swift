@@ -211,3 +211,96 @@ class NavidromeTrackRow: NSView {
         return String(format: "%d:%02d", m, s)
     }
 }
+
+// MARK: - NavidromeBrowseItemRow
+
+class NavidromeBrowseItemRow: NSView {
+    private let item: NavidromeBrowseItem
+
+    private let nameLabel = Label()
+    private let detailLabel = Label()
+    private let pinButton = ImageButton()
+    private let separator = Separator()
+
+    private let pinIcons = [
+        false: NSImage(systemSymbolName: NSImage.Name("pin"), accessibilityDescription: "Pin")?.tint(color: .lightGray),
+        true: NSImage(systemSymbolName: NSImage.Name("pin.fill"), accessibilityDescription: "Pinned")?.tint(color: .systemYellow),
+    ]
+
+    init(item: NavidromeBrowseItem) {
+        self.item = item
+        super.init(frame: NSRect())
+
+        addSubview(nameLabel)
+        addSubview(detailLabel)
+        addSubview(pinButton)
+        addSubview(separator)
+
+        nameLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        nameLabel.stringValue = item.title
+
+        detailLabel.font = NSFont.systemFont(ofSize: 11)
+        detailLabel.textColor = .secondaryLabelColor
+        detailLabel.stringValue = item.subtitle ?? ""
+
+        pinButton.target = self
+        pinButton.action = #selector(pinButtonClicked)
+        refreshPinButton()
+
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        detailLabel.translatesAutoresizingMaskIntoConstraints = false
+        pinButton.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            detailLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: nameLabel.trailingAnchor, multiplier: 1),
+            detailLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            detailLabel.trailingAnchor.constraint(lessThanOrEqualTo: pinButton.leadingAnchor, constant: -8),
+
+            pinButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            pinButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            pinButton.widthAnchor.constraint(equalToConstant: 16),
+            pinButton.heightAnchor.constraint(equalToConstant: 16),
+        ])
+
+        separator.alignBottom(of: self)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    @objc private func pinButtonClicked() {
+        let store = NaviolaPinnedItemStore.shared
+        if store.isPinned(subsonicId: item.navidromeId) {
+            store.remove(subsonicId: item.navidromeId)
+        } else {
+            let pinnedType: NaviolaPinnedItem.PinnedItemType
+            switch item.itemType {
+            case .artist: pinnedType = .artist
+            case .genre: pinnedType = .genre
+            case .playlist: pinnedType = .playlist
+            }
+
+            let pinnedItem = NaviolaPinnedItem(
+                type: pinnedType,
+                title: item.title,
+                subtitle: item.subtitle,
+                subsonicId: item.navidromeId,
+                coverArtId: item.coverArtId
+            )
+            store.add(pinnedItem)
+        }
+        refreshPinButton()
+    }
+
+    private func refreshPinButton() {
+        let pinned = NaviolaPinnedItemStore.shared.isPinned(subsonicId: item.navidromeId)
+        pinButton.image = pinIcons[pinned]!
+        pinButton.toolTip = pinned
+            ? NSLocalizedString("Pinned — click to unpin", comment: "Pin button tooltip")
+            : NSLocalizedString("Pin", comment: "Pin button tooltip")
+    }
+}
