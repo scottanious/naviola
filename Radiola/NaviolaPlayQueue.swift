@@ -39,7 +39,7 @@ class NaviolaPlayQueue: ObservableObject {
     }
 
     /// When the current track started playing.
-    private(set) var trackStartTime: Date?
+    var trackStartTime: Date?
 
     /// Set by userPause() to prevent auto-advance when user explicitly pauses.
     private var userDidPause = false

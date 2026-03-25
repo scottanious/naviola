@@ -119,4 +119,10 @@ class NaviolaAVPlayer: ObservableObject {
         guard let time = avPlayer?.currentTime(), time.isValid, !time.isIndefinite else { return 0 }
         return time.seconds
     }
+
+    /// Seek to a position in seconds.
+    func seek(to seconds: Double) {
+        let time = CMTime(seconds: seconds, preferredTimescale: 600)
+        avPlayer?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
+    }
 }

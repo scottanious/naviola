@@ -23,9 +23,10 @@ class ToolbarPlayView: NSViewController {
     private let repeatButton = NSButton()
     private let shuffleButton = NSButton()
 
-    // Progress
-    private let progressBar = NSProgressIndicator()
+    // Progress (seekable slider)
+    private let progressSlider = NSSlider()
     private let timeLabel = Label()
+    private var isSeeking = false
 
     private var progressTimer: Timer?
 
@@ -134,12 +135,14 @@ class ToolbarPlayView: NSViewController {
     }
 
     private func setupProgressBar() {
-        view.addSubview(progressBar)
-        progressBar.style = .bar
-        progressBar.isIndeterminate = false
-        progressBar.minValue = 0
-        progressBar.maxValue = 1
-        progressBar.controlSize = .small
+        view.addSubview(progressSlider)
+        progressSlider.controlSize = .small
+        progressSlider.minValue = 0
+        progressSlider.maxValue = 1
+        progressSlider.doubleValue = 0
+        progressSlider.isContinuous = true
+        progressSlider.target = self
+        progressSlider.action = #selector(seekSliderChanged)
 
         view.addSubview(timeLabel)
         timeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .regular)
@@ -151,7 +154,7 @@ class ToolbarPlayView: NSViewController {
         let allViews: [NSView] = [prevButton, playButton, nextButton,
                                    songLabel, stationLabel, onlyStationLabel,
                                    repeatButton, shuffleButton,
-                                   progressBar, timeLabel]
+                                   progressSlider, timeLabel]
         for v in allViews {
             v.translatesAutoresizingMaskIntoConstraints = false
             v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -220,16 +223,16 @@ class ToolbarPlayView: NSViewController {
             stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
             onlyStationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
 
-            // Row 2: Progress bar + time label (below transport)
-            progressBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
-            progressBar.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 3),
-            progressBar.heightAnchor.constraint(equalToConstant: 3),
+            // Row 2: Seekable slider + time label (below transport)
+            progressSlider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
+            progressSlider.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 6),
+            progressSlider.heightAnchor.constraint(equalToConstant: 14),
 
-            timeLabel.leadingAnchor.constraint(equalTo: progressBar.trailingAnchor, constant: 4),
-            timeLabel.centerYAnchor.constraint(equalTo: progressBar.centerYAnchor),
+            timeLabel.leadingAnchor.constraint(equalTo: progressSlider.trailingAnchor, constant: 4),
+            timeLabel.centerYAnchor.constraint(equalTo: progressSlider.centerYAnchor),
             timeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
 
-            progressBar.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -4),
+            progressSlider.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -4),
         ])
     }
 
@@ -298,30 +301,27 @@ class ToolbarPlayView: NSViewController {
 
         shuffleButton.contentTintColor = queue.shuffleEnabled ? .controlAccentColor : .tertiaryLabelColor
 
-        // Progress bar visibility
-        progressBar.isHidden = !queue.isActive
+        // Progress slider visibility
+        progressSlider.isHidden = !queue.isActive
         timeLabel.isHidden = !queue.isActive
 
         refreshProgress()
     }
 
     private func refreshProgress() {
-        let queue = NaviolaPlayQueue.shared
-        guard queue.isActive,
-              let track = queue.currentTrack,
-              let duration = track.duration, duration > 0 else {
-            progressBar.doubleValue = 0
-            timeLabel.stringValue = ""
-            return
-        }
+        // Don't update slider while user is dragging
+        guard !isSeeking else { return }
 
-        if let startTime = queue.trackStartTime {
-            let elapsed = min(Date().timeIntervalSince(startTime), Double(duration))
-            progressBar.doubleValue = elapsed / Double(duration)
-            timeLabel.stringValue = "\(formatTime(Int(elapsed))) / \(formatTime(duration))"
+        let avp = NaviolaAVPlayer.shared
+        let current = avp.getCurrentTime()
+        let dur = avp.duration
+
+        if dur > 0 {
+            progressSlider.doubleValue = current / dur
+            timeLabel.stringValue = "\(formatTime(Int(current))) / \(formatTime(Int(dur)))"
         } else {
-            progressBar.doubleValue = 0
-            timeLabel.stringValue = "0:00 / \(formatTime(duration))"
+            progressSlider.doubleValue = 0
+            timeLabel.stringValue = ""
         }
     }
 
@@ -340,6 +340,28 @@ class ToolbarPlayView: NSViewController {
 
     @objc private func previousTrack() { NaviolaPlayQueue.shared.previous() }
     @objc private func nextTrack() { NaviolaPlayQueue.shared.next() }
+
+    @objc private func seekSliderChanged() {
+        let avp = NaviolaAVPlayer.shared
+        guard avp.duration > 0 else { return }
+
+        // While dragging, update time label but don't seek yet
+        let targetTime = progressSlider.doubleValue * avp.duration
+        timeLabel.stringValue = "\(formatTime(Int(targetTime))) / \(formatTime(Int(avp.duration)))"
+
+        // Detect drag vs click: NSSlider sends continuous events while dragging
+        if let event = NSApp.currentEvent {
+            isSeeking = (event.type == .leftMouseDragged)
+            if event.type == .leftMouseUp {
+                // Drag ended or click — perform the seek
+                isSeeking = false
+                avp.seek(to: targetTime)
+
+                // Update play queue's trackStartTime to account for the seek
+                NaviolaPlayQueue.shared.trackStartTime = Date().addingTimeInterval(-targetTime)
+            }
+        }
+    }
 
     @objc private func toggleRepeat() {
         let q = NaviolaPlayQueue.shared
