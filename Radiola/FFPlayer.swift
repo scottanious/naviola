@@ -392,7 +392,24 @@ fileprivate class Backend {
 
         formatContext.pointee.interrupt_callback = interruptCB
 
-        err = avformat_open_input(&formatContext, url.absoluteString, nil, &options)
+        // Increase probesize and analyzeduration to handle MP3 files with large
+        // ID3 tags (embedded album art). Without this, FFmpeg miscalculates the
+        // audio duration and reports EOF before the audio stream actually ends.
+        formatContext.pointee.probesize = 10 * 1024 * 1024       // 10 MB
+        formatContext.pointee.max_analyze_duration = 10 * 1000000 // 10 seconds
+
+        // Force MP3 demuxer for Navidrome URLs to avoid ID3 tag duration
+        // miscalculation. The bundled FFmpeg's auto-detect mishandles MP3 files
+        // with large embedded album art, causing premature EOF.
+        let inputFormat: UnsafePointer<AVInputFormat>?
+        if url.absoluteString.contains("/rest/stream.view") {
+            inputFormat = av_find_input_format("mp3")
+            debug("[FFPlayer] Forcing mp3 input format for Navidrome stream")
+        } else {
+            inputFormat = nil
+        }
+
+        err = avformat_open_input(&formatContext, url.absoluteString, inputFormat, &options)
         if err < 0 {
             av_dict_free(&options)
             throw NSError(ffCode: err, message: invalidURLErrorDescription, debug: "Error calling avformat_open_input")
@@ -408,6 +425,16 @@ fileprivate class Backend {
         streamIndex = Int(av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, nil, 0))
         if streamIndex < 0 {
             throw NSError(code: .noStreamFoundError, message: invalidURLErrorDescription, debug: "No audio stream found.")
+        }
+
+        // Disable all non-audio streams (e.g., embedded album art as mjpeg).
+        // This prevents FFmpeg from hitting EOF on the video stream and
+        // misreporting it as end-of-file for the entire container.
+        let numStreams = Int(formatContext.pointee.nb_streams)
+        for i in 0 ..< numStreams {
+            if i != streamIndex, let s = formatContext.pointee.streams[i] {
+                s.pointee.discard = AVDISCARD_ALL
+            }
         }
 
         guard let stream = formatContext.pointee.streams[streamIndex] else {

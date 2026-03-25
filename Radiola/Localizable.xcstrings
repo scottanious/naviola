@@ -360,9 +360,6 @@
         }
       }
     },
-    "Album pinned to My lists" : {
-      "comment" : "Pin button tooltip"
-    },
     "Are you sure you want to continue?" : {
       "comment" : "Merger dialog message",
       "localizations" : {
@@ -1770,6 +1767,9 @@
         }
       }
     },
+    "Navidrome not configured — open Settings to connect" : {
+      "comment" : "Navidrome placeholder"
+    },
     "Naviola" : {
       "comment" : "Sidebar group"
     },
@@ -1921,6 +1921,7 @@
     },
     "Pause" : {
       "comment" : "Toolbar button toolTip",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1948,11 +1949,18 @@
         }
       }
     },
-    "Pin album to My lists" : {
+    "Pin album" : {
+      "comment" : "Pin button tooltip"
+    },
+    "Pinned" : {
+      "comment" : "Sidebar group\nSidebar item\nStatus bar menu section"
+    },
+    "Pinned — click to unpin" : {
       "comment" : "Pin button tooltip"
     },
     "Play" : {
       "comment" : "Toolbar button toolTip",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2124,6 +2132,12 @@
           }
         }
       }
+    },
+    "Search" : {
+      "comment" : "Navidrome station list"
+    },
+    "Search albums..." : {
+      "comment" : "Navidrome search placeholder"
     },
     "Settings…" : {
       "comment" : "Status bar menu item",
