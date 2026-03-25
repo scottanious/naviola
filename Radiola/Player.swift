@@ -37,11 +37,18 @@ class Player: NSObject {
     private var timer: Timer?
     private let connectDelay = 20.0
 
+    // Naviola: AVFoundation backend for Navidrome tracks
+    private let avPlayer = NaviolaAVPlayer.shared
+    private var avStateWatch: AnyCancellable?
+    private var usingAVPlayer = false
+
     /* ****************************************
      *
      * ****************************************/
     var volume: Float { didSet {
-        player.volume = max(0, min(1, volume))
+        let v = max(0, min(1, volume))
+        player.volume = v
+        avPlayer.volume = v
         settings.volumeLevel = volume
         NotificationCenter.default.post(name: Notification.Name.PlayerVolumeChanged, object: nil)
     }}
@@ -51,6 +58,7 @@ class Player: NSObject {
      * ****************************************/
     var isMuted: Bool { didSet {
         player.isMuted = isMuted
+        avPlayer.isMuted = isMuted
         settings.volumeIsMuted = isMuted
         NotificationCenter.default.post(name: Notification.Name.PlayerVolumeChanged, object: nil)
     }}
@@ -78,6 +86,12 @@ class Player: NSObject {
 
         stateWatch = player.$state.receive(on: RunLoop.main).sink { self.stateChenged($0) }
         metaWatch = player.$nowPlaing.receive(on: RunLoop.main).sink { self.metadataChanged($0) }
+
+        // Naviola: observe AVFoundation player state
+        avStateWatch = avPlayer.$state.receive(on: RunLoop.main).sink { [weak self] state in
+            guard let self = self, self.usingAVPlayer else { return }
+            self.avStateChenged(state)
+        }
 
         AudioSytstem.debugAudioDevices(prefix: "[Player]")
     }
@@ -108,12 +122,20 @@ class Player: NSObject {
 
         stop()
 
-        player.volume = self.volume
-        player.isMuted = self.isMuted
-
-        let audioDeviceUID = AudioSytstem.device(byUID: settings.audioDevice)?.UID
-        player.play(url: url, audioDeviceUID: audioDeviceUID)
-        AudioSytstem.debugAudioDevices(prefix: "[Player]")
+        // Naviola: use AVFoundation for Navidrome tracks, FFPlayer for radio
+        if station is NavidromeTrack {
+            usingAVPlayer = true
+            avPlayer.volume = self.volume
+            avPlayer.isMuted = self.isMuted
+            avPlayer.play(url: url)
+        } else {
+            usingAVPlayer = false
+            player.volume = self.volume
+            player.isMuted = self.isMuted
+            let audioDeviceUID = AudioSytstem.device(byUID: settings.audioDevice)?.UID
+            player.play(url: url, audioDeviceUID: audioDeviceUID)
+            AudioSytstem.debugAudioDevices(prefix: "[Player]")
+        }
 
         settings.lastStationUrl = station.url
 
@@ -138,7 +160,11 @@ class Player: NSObject {
      *
      * ****************************************/
     @objc func stop() {
-        player.stop()
+        if usingAVPlayer {
+            avPlayer.stop()
+        } else {
+            player.stop()
+        }
     }
 
     /* ****************************************
@@ -216,6 +242,32 @@ class Player: NSObject {
                     let text = error.localizedDescription.filter{!$0.isNewline}
                     warning("Player  error: \"\(text)\".   Description: \"\(error.debugDescription)\"")
                 }
+        }
+
+        NotificationCenter.default.post(name: Notification.Name.PlayerStatusChanged, object: nil)
+    }
+
+    // ****************************************
+    // Naviola: AVFoundation state bridge
+    // ****************************************
+    private func avStateChenged(_ state: NaviolaAVPlayer.State) {
+        debug("AVPlayer status changed \(state) for \(station?.url ?? "nil")")
+
+        switch state {
+        case .stopped:
+            self.status = .paused
+            metadataChanged(nil)
+
+        case .connecting:
+            self.status = .connecting
+            metadataChanged(nil)
+
+        case .playing:
+            self.status = .playing
+
+        case .error:
+            self.status = .paused
+            metadataChanged(nil)
         }
 
         NotificationCenter.default.post(name: Notification.Name.PlayerStatusChanged, object: nil)
