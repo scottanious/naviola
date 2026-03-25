@@ -98,7 +98,10 @@ extension NavidromeStationDelegate: NSOutlineViewDataSource {
         }
 
         if let browseItem = item as? NavidromeBrowseItem {
-            return browseItem.itemType == .playlist ? browseItem.tracks.count : browseItem.albums.count
+            if browseItem.itemType == .playlist && !browseItem.tracks.isEmpty {
+                return browseItem.tracks.count
+            }
+            return browseItem.albums.count
         }
 
         if let album = item as? NavidromeAlbum {
@@ -114,7 +117,10 @@ extension NavidromeStationDelegate: NSOutlineViewDataSource {
         }
 
         if let browseItem = item as? NavidromeBrowseItem {
-            return browseItem.itemType == .playlist ? browseItem.tracks[index] : browseItem.albums[index]
+            if browseItem.itemType == .playlist && !browseItem.tracks.isEmpty {
+                return browseItem.tracks[index]
+            }
+            return browseItem.albums[index]
         }
 
         if let album = item as? NavidromeAlbum {
@@ -200,24 +206,67 @@ extension NavidromeStationDelegate: NSMenuDelegate {
         }
 
         if let browseItem = outlineView.item(atRow: row) as? NavidromeBrowseItem {
-            let playTitle: String
-            switch browseItem.itemType {
-            case .playlist: playTitle = NSLocalizedString("Play Playlist", comment: "Context menu")
-            case .artist: playTitle = NSLocalizedString("Play Artist", comment: "Context menu")
-            case .genre: playTitle = NSLocalizedString("Play Genre", comment: "Context menu")
-            }
-            let playItem = NSMenuItem(title: playTitle, action: #selector(playBrowseItem(_:)), keyEquivalent: "")
-            playItem.target = self
-            playItem.representedObject = browseItem
-            menu.addItem(playItem)
+            if browseItem.itemType == .group {
+                // Group context menu
+                let renameItem = NSMenuItem(title: NSLocalizedString("Rename Group", comment: "Context menu"), action: #selector(renameGroup(_:)), keyEquivalent: "")
+                renameItem.target = self
+                renameItem.representedObject = browseItem
+                menu.addItem(renameItem)
 
-            let pinTitle = NaviolaPinnedItemStore.shared.isPinned(subsonicId: browseItem.navidromeId)
-                ? NSLocalizedString("Unpin", comment: "Context menu")
-                : NSLocalizedString("Pin", comment: "Context menu")
-            let pinItem = NSMenuItem(title: pinTitle, action: #selector(togglePinBrowseItem(_:)), keyEquivalent: "")
-            pinItem.target = self
-            pinItem.representedObject = browseItem
-            menu.addItem(pinItem)
+                let deleteItem = NSMenuItem(title: NSLocalizedString("Delete Group", comment: "Context menu"), action: #selector(deleteGroup(_:)), keyEquivalent: "")
+                deleteItem.target = self
+                deleteItem.representedObject = browseItem
+                menu.addItem(deleteItem)
+            } else {
+                let playTitle: String
+                switch browseItem.itemType {
+                case .playlist: playTitle = NSLocalizedString("Play Playlist", comment: "Context menu")
+                case .artist: playTitle = NSLocalizedString("Play Artist", comment: "Context menu")
+                case .genre: playTitle = NSLocalizedString("Play Genre", comment: "Context menu")
+                default: playTitle = NSLocalizedString("Play", comment: "Context menu")
+                }
+                let playItem = NSMenuItem(title: playTitle, action: #selector(playBrowseItem(_:)), keyEquivalent: "")
+                playItem.target = self
+                playItem.representedObject = browseItem
+                menu.addItem(playItem)
+
+                let pinTitle = NaviolaPinnedItemStore.shared.isPinned(subsonicId: browseItem.navidromeId)
+                    ? NSLocalizedString("Unpin", comment: "Context menu")
+                    : NSLocalizedString("Pin", comment: "Context menu")
+                let pinItem = NSMenuItem(title: pinTitle, action: #selector(togglePinBrowseItem(_:)), keyEquivalent: "")
+                pinItem.target = self
+                pinItem.representedObject = browseItem
+                menu.addItem(pinItem)
+            }
+        }
+
+        // Group management options (only in Pinned view)
+        if list?.provider.category == .pinned {
+            let clickedItem = row >= 0 ? outlineView.item(atRow: row) : nil
+            menu.addItem(NSMenuItem.separator())
+
+            // New Group
+            let newGroupItem = NSMenuItem(title: NSLocalizedString("New Group", comment: "Context menu"), action: #selector(newGroup), keyEquivalent: "")
+            newGroupItem.target = self
+            menu.addItem(newGroupItem)
+
+            // Move to Group (for items, not groups)
+            if clickedItem != nil, !(clickedItem is NavidromeBrowseItem && (clickedItem as? NavidromeBrowseItem)?.itemType == .group) {
+                let store = NaviolaPinnedItemStore.shared
+                if !store.groups.isEmpty {
+                    let moveMenu = NSMenu()
+                    for group in store.groups {
+                        let moveItem = NSMenuItem(title: group.title, action: #selector(moveToGroupAction(_:)), keyEquivalent: "")
+                        moveItem.target = self
+                        moveItem.representedObject = ["row": row, "groupId": group.id.uuidString]
+                        moveMenu.addItem(moveItem)
+                    }
+
+                    let moveToItem = NSMenuItem(title: NSLocalizedString("Move to Group", comment: "Context menu"), action: nil, keyEquivalent: "")
+                    moveToItem.submenu = moveMenu
+                    menu.addItem(moveToItem)
+                }
+            }
         }
     }
 
@@ -274,6 +323,7 @@ extension NavidromeStationDelegate: NSMenuDelegate {
             case .artist: pinnedType = .artist
             case .genre: pinnedType = .genre
             case .playlist: pinnedType = .playlist
+            case .group: return // groups aren't pinned items
             }
 
             let item = NaviolaPinnedItem(
@@ -284,6 +334,58 @@ extension NavidromeStationDelegate: NSMenuDelegate {
                 coverArtId: browseItem.coverArtId
             )
             store.add(item)
+        }
+    }
+
+    @objc private func newGroup() {
+        let _ = NaviolaPinnedItemStore.shared.addGroup(title: NSLocalizedString("New Group", comment: "Default group name"))
+        Task { @MainActor in self.search() }
+    }
+
+    @objc private func renameGroup(_ sender: NSMenuItem) {
+        guard let browseItem = sender.representedObject as? NavidromeBrowseItem,
+              let groupId = UUID(uuidString: browseItem.navidromeId) else { return }
+
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Rename Group", comment: "Dialog title")
+        alert.addButton(withTitle: NSLocalizedString("OK", comment: ""))
+        alert.addButton(withTitle: NSLocalizedString("Cancel", comment: ""))
+        let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        input.stringValue = browseItem.title
+        alert.accessoryView = input
+        if alert.runModal() == .alertFirstButtonReturn && !input.stringValue.isEmpty {
+            NaviolaPinnedItemStore.shared.renameGroup(id: groupId, title: input.stringValue)
+            Task { @MainActor in self.search() }
+        }
+    }
+
+    @objc private func deleteGroup(_ sender: NSMenuItem) {
+        guard let browseItem = sender.representedObject as? NavidromeBrowseItem,
+              let groupId = UUID(uuidString: browseItem.navidromeId) else { return }
+        NaviolaPinnedItemStore.shared.removeGroup(id: groupId)
+        Task { @MainActor in self.search() }
+    }
+
+    @objc private func moveToGroupAction(_ sender: NSMenuItem) {
+        guard let info = sender.representedObject as? [String: Any],
+              let row = info["row"] as? Int,
+              let groupIdStr = info["groupId"] as? String,
+              let groupId = UUID(uuidString: groupIdStr) else { return }
+
+        // Find the pinned item ID for the clicked row
+        let clickedItem = outlineView.item(atRow: row)
+        var pinnedItemId: UUID?
+
+        if let album = clickedItem as? NavidromeAlbum {
+            // Find by subsonic ID in the store
+            pinnedItemId = NaviolaPinnedItemStore.shared.items.first { $0.subsonicId == album.navidromeId }?.id
+        } else if let browseItem = clickedItem as? NavidromeBrowseItem {
+            pinnedItemId = NaviolaPinnedItemStore.shared.items.first { $0.subsonicId == browseItem.navidromeId }?.id
+        }
+
+        if let itemId = pinnedItemId {
+            NaviolaPinnedItemStore.shared.moveToGroup(itemId: itemId, groupId: groupId)
+            Task { @MainActor in self.search() }
         }
     }
 

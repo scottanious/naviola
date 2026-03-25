@@ -282,6 +282,7 @@ class NavidromeBrowseItemRow: NSView {
             case .artist: pinnedType = .artist
             case .genre: pinnedType = .genre
             case .playlist: pinnedType = .playlist
+            case .group: return
             }
 
             let pinnedItem = NaviolaPinnedItem(

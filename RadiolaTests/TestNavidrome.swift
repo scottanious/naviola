@@ -223,4 +223,44 @@ final class TestNavidrome: XCTestCase {
         XCTAssertEqual(store2.items[1].type, .track)
         XCTAssertTrue(store2.isPinned(subsonicId: "id-1"))
     }
+
+    func testPinnedItemStoreGroups() throws {
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_pinned_\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        let store = NaviolaPinnedItemStore(fileURL: tempURL)
+
+        // Add items and a group
+        store.add(NaviolaPinnedItem(type: .album, title: "Album A", subsonicId: "a1"))
+        store.add(NaviolaPinnedItem(type: .album, title: "Album B", subsonicId: "a2"))
+        let group = store.addGroup(title: "My Group")
+
+        XCTAssertEqual(store.ungrouped.count, 2)
+        XCTAssertEqual(store.groups.count, 1)
+        XCTAssertEqual(store.items.count, 2) // groups empty, so only ungrouped
+
+        // Move item to group
+        let itemId = store.ungrouped[0].id
+        store.moveToGroup(itemId: itemId, groupId: group.id)
+
+        XCTAssertEqual(store.ungrouped.count, 1)
+        XCTAssertEqual(store.groups[0].items.count, 1)
+        XCTAssertEqual(store.items.count, 2) // total unchanged
+
+        // Persist and reload
+        let store2 = NaviolaPinnedItemStore(fileURL: tempURL)
+        XCTAssertEqual(store2.ungrouped.count, 1)
+        XCTAssertEqual(store2.groups.count, 1)
+        XCTAssertEqual(store2.groups[0].title, "My Group")
+        XCTAssertEqual(store2.groups[0].items.count, 1)
+
+        // Move back to ungrouped
+        store2.moveToUngrouped(itemId: store2.groups[0].items[0].id)
+        XCTAssertEqual(store2.ungrouped.count, 2)
+        XCTAssertEqual(store2.groups[0].items.count, 0)
+
+        // Delete group
+        store2.removeGroup(id: group.id)
+        XCTAssertEqual(store2.groups.count, 0)
+    }
 }

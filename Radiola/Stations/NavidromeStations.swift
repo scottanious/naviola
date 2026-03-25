@@ -92,7 +92,7 @@ class NavidromeBrowseItem: Identifiable {
     var tracks: [NavidromeTrack] = []
     var childrenLoaded: Bool = false
 
-    enum ItemType { case artist, genre, playlist }
+    enum ItemType { case artist, genre, playlist, group }
     let itemType: ItemType
 
     init(title: String, navidromeId: String, itemType: ItemType, subtitle: String? = nil, coverArtId: String? = nil) {
@@ -118,6 +118,8 @@ class NavidromeBrowseItem: Identifiable {
         case .playlist:
             let entries = try await provider.fetchPlaylistTracks(navidromeId)
             tracks = entries.map { NavidromeTrack(from: $0, client: client) }
+        case .group:
+            break // Groups are pre-populated, no server fetch needed
         }
         childrenLoaded = true
     }
@@ -234,33 +236,47 @@ class NavidromeAlbumList: ObservableObject {
 
             case .pinned:
                 let store = NaviolaPinnedItemStore.shared
-                // Albums
-                let albumPins = store.items.filter { $0.type == .album }
-                items = albumPins.map { pin in
-                    let parts = pin.title.components(separatedBy: " - ")
-                    let artist = parts.count > 1 ? parts.first : nil
-                    let albumName = parts.count > 1 ? parts.dropFirst().joined(separator: " - ") : pin.title
-                    let album = NavidromeAlbum(title: albumName, navidromeId: pin.subsonicId)
-                    album.artist = artist
-                    album.coverArtId = pin.coverArtId
-                    return album
-                }
-                // Non-album pins (artists, genres, playlists)
-                browseItems = store.items.filter { $0.type != .album }.map { pin in
-                    let itemType: NavidromeBrowseItem.ItemType
-                    switch pin.type {
-                    case .artist: itemType = .artist
-                    case .genre: itemType = .genre
-                    case .playlist: itemType = .playlist
-                    default: itemType = .playlist // fallback
-                    }
-                    return NavidromeBrowseItem(
-                        title: pin.title,
-                        navidromeId: pin.subsonicId,
-                        itemType: itemType,
-                        subtitle: pin.subtitle,
-                        coverArtId: pin.coverArtId
+
+                // Convert ungrouped pins to display items
+                items = []
+                browseItems = []
+                appendPinnedItems(store.ungrouped)
+
+                // Groups become browse items with .group type
+                for group in store.groups {
+                    let groupItem = NavidromeBrowseItem(
+                        title: group.title,
+                        navidromeId: group.id.uuidString,
+                        itemType: .group,
+                        subtitle: "\(group.items.count) items"
                     )
+                    // Pre-populate children from group's pins
+                    for pin in group.items {
+                        if pin.type == .album {
+                            let parts = pin.title.components(separatedBy: " - ")
+                            let artist = parts.count > 1 ? parts.first : nil
+                            let albumName = parts.count > 1 ? parts.dropFirst().joined(separator: " - ") : pin.title
+                            let album = NavidromeAlbum(title: albumName, navidromeId: pin.subsonicId)
+                            album.artist = artist
+                            album.coverArtId = pin.coverArtId
+                            groupItem.albums.append(album)
+                        } else {
+                            let itemType: NavidromeBrowseItem.ItemType
+                            switch pin.type {
+                            case .artist: itemType = .artist
+                            case .genre: itemType = .genre
+                            case .playlist: itemType = .playlist
+                            default: itemType = .playlist
+                            }
+                            // Nest non-album pins as albums placeholder for now
+                            // (browse items can't nest inside browse items in current outline)
+                            let album = NavidromeAlbum(title: pin.title, navidromeId: pin.subsonicId)
+                            album.coverArtId = pin.coverArtId
+                            groupItem.albums.append(album)
+                        }
+                    }
+                    groupItem.childrenLoaded = true
+                    browseItems.append(groupItem)
                 }
 
             case .artists:
@@ -323,6 +339,36 @@ class NavidromeAlbumList: ObservableObject {
 
     func firstAlbum(byID: UUID) -> NavidromeAlbum? {
         return items.first { $0.id == byID }
+    }
+
+    /// Helper: convert pinned items to display items (albums + browse items).
+    private func appendPinnedItems(_ pins: [NaviolaPinnedItem]) {
+        for pin in pins {
+            if pin.type == .album {
+                let parts = pin.title.components(separatedBy: " - ")
+                let artist = parts.count > 1 ? parts.first : nil
+                let albumName = parts.count > 1 ? parts.dropFirst().joined(separator: " - ") : pin.title
+                let album = NavidromeAlbum(title: albumName, navidromeId: pin.subsonicId)
+                album.artist = artist
+                album.coverArtId = pin.coverArtId
+                items.append(album)
+            } else {
+                let itemType: NavidromeBrowseItem.ItemType
+                switch pin.type {
+                case .artist: itemType = .artist
+                case .genre: itemType = .genre
+                case .playlist: itemType = .playlist
+                default: itemType = .playlist
+                }
+                browseItems.append(NavidromeBrowseItem(
+                    title: pin.title,
+                    navidromeId: pin.subsonicId,
+                    itemType: itemType,
+                    subtitle: pin.subtitle,
+                    coverArtId: pin.coverArtId
+                ))
+            }
+        }
     }
 
     /// Find a track across all albums.

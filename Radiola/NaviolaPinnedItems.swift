@@ -2,9 +2,7 @@
 //  NaviolaPinnedItems.swift
 //  Radiola
 //
-//  Naviola — Generalized pinned items with JSON persistence.
-//  Replaces OPML-based pin approach. Stores Subsonic IDs,
-//  resolves to tracks at play time.
+//  Naviola — Pinned items with group organization and JSON persistence.
 //
 
 import Foundation
@@ -39,12 +37,41 @@ struct NaviolaPinnedItem: Codable, Identifiable {
     }
 }
 
+// MARK: - NaviolaPinnedGroup
+
+struct NaviolaPinnedGroup: Codable, Identifiable {
+    let id: UUID
+    var title: String
+    var items: [NaviolaPinnedItem]
+
+    init(title: String, items: [NaviolaPinnedItem] = []) {
+        self.id = UUID()
+        self.title = title
+        self.items = items
+    }
+}
+
+// MARK: - Persistence Container
+
+/// Top-level JSON structure. Backward-compatible: if loading the old flat
+/// array format fails, falls back to decoding as [NaviolaPinnedItem].
+struct NaviolaPinnedData: Codable {
+    var ungrouped: [NaviolaPinnedItem]
+    var groups: [NaviolaPinnedGroup]
+}
+
 // MARK: - NaviolaPinnedItemStore
 
 class NaviolaPinnedItemStore: ObservableObject {
     static let shared = NaviolaPinnedItemStore()
 
-    @Published var items: [NaviolaPinnedItem] = []
+    @Published var ungrouped: [NaviolaPinnedItem] = []
+    @Published var groups: [NaviolaPinnedGroup] = []
+
+    /// Flat list of ALL items (ungrouped + all group members). For backward compat.
+    var items: [NaviolaPinnedItem] {
+        ungrouped + groups.flatMap { $0.items }
+    }
 
     private let fileURL: URL
 
@@ -70,17 +97,23 @@ class NaviolaPinnedItemStore: ObservableObject {
 
     func add(_ item: NaviolaPinnedItem) {
         guard !isPinned(subsonicId: item.subsonicId) else { return }
-        items.append(item)
+        ungrouped.append(item)
         save()
     }
 
     func remove(id: UUID) {
-        items.removeAll { $0.id == id }
+        ungrouped.removeAll { $0.id == id }
+        for i in groups.indices {
+            groups[i].items.removeAll { $0.id == id }
+        }
         save()
     }
 
     func remove(subsonicId: String) {
-        items.removeAll { $0.subsonicId == subsonicId }
+        ungrouped.removeAll { $0.subsonicId == subsonicId }
+        for i in groups.indices {
+            groups[i].items.removeAll { $0.subsonicId == subsonicId }
+        }
         save()
     }
 
@@ -92,6 +125,63 @@ class NaviolaPinnedItemStore: ObservableObject {
         return items.first { $0.subsonicId == id }
     }
 
+    // MARK: - Group Operations
+
+    func addGroup(title: String) -> NaviolaPinnedGroup {
+        let group = NaviolaPinnedGroup(title: title)
+        groups.append(group)
+        save()
+        return group
+    }
+
+    func removeGroup(id: UUID) {
+        if let idx = groups.firstIndex(where: { $0.id == id }) {
+            // Move group's items to ungrouped
+            ungrouped.append(contentsOf: groups[idx].items)
+            groups.remove(at: idx)
+            save()
+        }
+    }
+
+    func renameGroup(id: UUID, title: String) {
+        if let idx = groups.firstIndex(where: { $0.id == id }) {
+            groups[idx].title = title
+            save()
+        }
+    }
+
+    func moveToGroup(itemId: UUID, groupId: UUID) {
+        // Find and remove item from wherever it is
+        var item: NaviolaPinnedItem?
+        if let idx = ungrouped.firstIndex(where: { $0.id == itemId }) {
+            item = ungrouped.remove(at: idx)
+        } else {
+            for gi in groups.indices {
+                if let idx = groups[gi].items.firstIndex(where: { $0.id == itemId }) {
+                    item = groups[gi].items.remove(at: idx)
+                    break
+                }
+            }
+        }
+
+        // Add to target group
+        if let item = item, let gi = groups.firstIndex(where: { $0.id == groupId }) {
+            groups[gi].items.append(item)
+            save()
+        }
+    }
+
+    func moveToUngrouped(itemId: UUID) {
+        for gi in groups.indices {
+            if let idx = groups[gi].items.firstIndex(where: { $0.id == itemId }) {
+                let item = groups[gi].items.remove(at: idx)
+                ungrouped.append(item)
+                save()
+                return
+            }
+        }
+    }
+
     // MARK: - Persistence
 
     func load() {
@@ -99,7 +189,24 @@ class NaviolaPinnedItemStore: ObservableObject {
 
         do {
             let data = try Data(contentsOf: fileURL)
-            items = try JSONDecoder().decode([NaviolaPinnedItem].self, from: data)
+
+            // Try new format first
+            if let pinData = try? JSONDecoder().decode(NaviolaPinnedData.self, from: data) {
+                ungrouped = pinData.ungrouped
+                groups = pinData.groups
+                return
+            }
+
+            // Fall back to old flat array format
+            if let flatItems = try? JSONDecoder().decode([NaviolaPinnedItem].self, from: data) {
+                ungrouped = flatItems
+                groups = []
+                // Re-save in new format
+                save()
+                return
+            }
+
+            warning("Failed to decode pinned items in any format")
         } catch {
             warning("Failed to load pinned items: \(error)")
         }
@@ -107,7 +214,10 @@ class NaviolaPinnedItemStore: ObservableObject {
 
     func save() {
         do {
-            let data = try JSONEncoder().encode(items)
+            let pinData = NaviolaPinnedData(ungrouped: ungrouped, groups: groups)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(pinData)
             try data.write(to: fileURL, options: .atomic)
         } catch {
             warning("Failed to save pinned items: \(error)")

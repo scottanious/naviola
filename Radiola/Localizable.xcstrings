@@ -1213,6 +1213,9 @@
         }
       }
     },
+    "Delete Group" : {
+      "comment" : "Context menu"
+    },
     "Export…" : {
       "comment" : "History export button",
       "localizations" : {
@@ -1672,6 +1675,9 @@
     "Most Played" : {
       "comment" : "Album sort mode"
     },
+    "Move to Group" : {
+      "comment" : "Context menu"
+    },
     "Mute" : {
       "comment" : "Mute button tooltip\nStatus bar menu Item",
       "localizations" : {
@@ -1794,6 +1800,9 @@
     "Naviola" : {
       "comment" : "Sidebar group"
     },
+    "New Group" : {
+      "comment" : "Context menu\nDefault group name"
+    },
     "No records yet" : {
       "comment" : "History window placeholder",
       "extractionState" : "stale",
@@ -1911,6 +1920,9 @@
         }
       }
     },
+    "OK" : {
+
+    },
     "Open Radiola…" : {
       "comment" : "Status bar menu item",
       "localizations" : {
@@ -1986,8 +1998,7 @@
       "comment" : "Pin button tooltip"
     },
     "Play" : {
-      "comment" : "Toolbar button toolTip",
-      "extractionState" : "stale",
+      "comment" : "Context menu",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2180,6 +2191,9 @@
           }
         }
       }
+    },
+    "Rename Group" : {
+      "comment" : "Context menu\nDialog title"
     },
     "Search" : {
       "comment" : "Navidrome category"
