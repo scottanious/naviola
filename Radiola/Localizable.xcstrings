@@ -1952,6 +1952,9 @@
     "Pin album" : {
       "comment" : "Pin button tooltip"
     },
+    "Pin Album" : {
+      "comment" : "Context menu"
+    },
     "Pinned" : {
       "comment" : "Sidebar group\nSidebar item\nStatus bar menu section"
     },
@@ -1987,6 +1990,9 @@
           }
         }
       }
+    },
+    "Play Album" : {
+      "comment" : "Context menu"
     },
     "playing now" : {
       "comment" : "History window song status",
@@ -2796,6 +2802,9 @@
           }
         }
       }
+    },
+    "Unpin Album" : {
+      "comment" : "Context menu"
     },
     "URL:" : {
       "comment" : "Add station dialog label for URL edit",

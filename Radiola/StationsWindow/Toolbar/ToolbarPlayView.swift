@@ -31,7 +31,7 @@ class ToolbarPlayView: NSViewController {
     private var progressTimer: Timer?
 
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 500, height: 52))
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 500, height: 72))
     }
 
     override func viewDidLoad() {
@@ -178,7 +178,7 @@ class ToolbarPlayView: NSViewController {
 
             // Play button — center-left
             playButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
-            playButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+            playButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
             playButton.widthAnchor.constraint(equalToConstant: 32),
             playButton.heightAnchor.constraint(equalToConstant: 32),
 

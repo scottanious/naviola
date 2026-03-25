@@ -81,12 +81,11 @@ fileprivate class NaviolaPlaybackView: NSView {
             nextButton.widthAnchor.constraint(equalToConstant: iconSize),
             nextButton.heightAnchor.constraint(equalToConstant: iconSize),
 
-            // Center: time + position
-            timeLabel.leadingAnchor.constraint(equalTo: nextButton.trailingAnchor, constant: 14),
-            timeLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-
-            positionLabel.leadingAnchor.constraint(equalTo: timeLabel.trailingAnchor, constant: 8),
+            // Center: time + position — pinned to horizontal midline
             positionLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            timeLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            timeLabel.trailingAnchor.constraint(equalTo: centerXAnchor, constant: -2),
+            positionLabel.leadingAnchor.constraint(equalTo: centerXAnchor, constant: 2),
 
             // Right group: repeat + shuffle
             repeatButton.leadingAnchor.constraint(greaterThanOrEqualTo: positionLabel.trailingAnchor, constant: 8),

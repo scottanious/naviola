@@ -480,6 +480,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         stationsTree.delegate = navidromeStationsDelegate
         stationsTree.dataSource = navidromeStationsDelegate
         navidromeStationsDelegate.list = list
+        navidromeStationsDelegate.installContextMenu()
 
         stationsTree.reloadItem(nil, reloadChildren: true)
 
@@ -615,10 +616,17 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             return
         }
 
-        // Naviola: double-click an album → load full album into queue from track 1
+        // Naviola: double-click an album → fetch tracks if needed, play from track 1
         if let album = clickedItem as? NavidromeAlbum {
-            if album.tracksLoaded && !album.tracks.isEmpty {
-                NaviolaPlayQueue.shared.playTracks(album.tracks)
+            Task { @MainActor in
+                do {
+                    try await album.loadTracks()
+                    if !album.tracks.isEmpty {
+                        NaviolaPlayQueue.shared.playTracks(album.tracks)
+                    }
+                } catch {
+                    warning("Failed to load tracks for \(album.title): \(error)")
+                }
             }
             return
         }

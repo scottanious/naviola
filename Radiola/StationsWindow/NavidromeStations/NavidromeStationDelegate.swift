@@ -53,6 +53,79 @@ extension NavidromeStationDelegate: NSOutlineViewDelegate {
     }
 }
 
+// MARK: - Context Menu
+
+extension NavidromeStationDelegate: NSMenuDelegate {
+    /// Set up the context menu on the outline view.
+    func installContextMenu() {
+        let menu = NSMenu()
+        menu.delegate = self
+        outlineView.menu = menu
+    }
+
+    /// Dynamically populate the menu based on the clicked row.
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        menu.removeAllItems()
+
+        let row = outlineView.clickedRow
+        guard row >= 0 else { return }
+
+        if let album = outlineView.item(atRow: row) as? NavidromeAlbum {
+            let playItem = NSMenuItem(title: NSLocalizedString("Play Album", comment: "Context menu"), action: #selector(playAlbum(_:)), keyEquivalent: "")
+            playItem.target = self
+            playItem.representedObject = album
+            menu.addItem(playItem)
+
+            let pinTitle = NaviolaPinnedItemStore.shared.isPinned(subsonicId: album.navidromeId)
+                ? NSLocalizedString("Unpin Album", comment: "Context menu")
+                : NSLocalizedString("Pin Album", comment: "Context menu")
+            let pinItem = NSMenuItem(title: pinTitle, action: #selector(togglePinAlbum(_:)), keyEquivalent: "")
+            pinItem.target = self
+            pinItem.representedObject = album
+            menu.addItem(pinItem)
+        }
+    }
+
+    @objc private func playAlbum(_ sender: NSMenuItem) {
+        guard let album = sender.representedObject as? NavidromeAlbum else { return }
+
+        Task { @MainActor in
+            do {
+                try await album.loadTracks()
+                if !album.tracks.isEmpty {
+                    NaviolaPlayQueue.shared.playTracks(album.tracks)
+                }
+            } catch {
+                warning("Failed to load tracks for \(album.title): \(error)")
+            }
+        }
+    }
+
+    @objc private func togglePinAlbum(_ sender: NSMenuItem) {
+        guard let album = sender.representedObject as? NavidromeAlbum else { return }
+        let store = NaviolaPinnedItemStore.shared
+
+        if store.isPinned(subsonicId: album.navidromeId) {
+            store.remove(subsonicId: album.navidromeId)
+        } else {
+            var parts = [String]()
+            if let count = album.songCount { parts.append("\(count) tracks") }
+            if let year = album.year { parts.append(String(year)) }
+
+            let item = NaviolaPinnedItem(
+                type: .album,
+                title: album.artist != nil ? "\(album.artist!) - \(album.title)" : album.title,
+                subtitle: parts.isEmpty ? nil : parts.joined(separator: " · "),
+                subsonicId: album.navidromeId,
+                coverArtId: album.coverArtId
+            )
+            store.add(item)
+        }
+
+        outlineView.reloadData()
+    }
+}
+
 // MARK: - NSOutlineViewDataSource
 
 extension NavidromeStationDelegate: NSOutlineViewDataSource {

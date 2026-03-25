@@ -20,6 +20,7 @@ class NavidromePage: NSViewController {
     private let passwordEdit = NSSecureTextField()
 
     private let testButton = NSButton(title: NSLocalizedString("Test Connection", tableName: "Settings", comment: "Navidrome settings button"), target: nil, action: nil)
+    private let clearSessionButton = NSButton(title: NSLocalizedString("Clear Session", tableName: "Settings", comment: "Navidrome settings button"), target: nil, action: nil)
     private let statusLabel = Label()
 
     // MARK: - Init
@@ -47,6 +48,10 @@ class NavidromePage: NSViewController {
         testButton.bezelStyle = .rounded
         testButton.target = self
         testButton.action = #selector(testConnection)
+
+        clearSessionButton.bezelStyle = .rounded
+        clearSessionButton.target = self
+        clearSessionButton.action = #selector(clearSession)
 
         statusLabel.font = NSFont.systemFont(ofSize: 12)
         statusLabel.textColor = .secondaryLabelColor
@@ -112,16 +117,21 @@ class NavidromePage: NSViewController {
         separator.leadingAnchor.constraint(equalTo: res.leadingAnchor, constant: 20).isActive = true
         separator.trailingAnchor.constraint(equalTo: res.trailingAnchor, constant: -20).isActive = true
 
-        // Test Connection button + status
+        // Test Connection + Clear Session buttons + status
         res.addSubview(testButton)
         testButton.translatesAutoresizingMaskIntoConstraints = false
         testButton.topAnchor.constraint(equalToSystemSpacingBelow: separator.bottomAnchor, multiplier: 1).isActive = true
         testButton.leadingAnchor.constraint(equalTo: serverEdit.leadingAnchor).isActive = true
 
+        res.addSubview(clearSessionButton)
+        clearSessionButton.translatesAutoresizingMaskIntoConstraints = false
+        clearSessionButton.centerYAnchor.constraint(equalTo: testButton.centerYAnchor).isActive = true
+        clearSessionButton.leadingAnchor.constraint(equalToSystemSpacingAfter: testButton.trailingAnchor, multiplier: 1).isActive = true
+
         res.addSubview(statusLabel)
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.centerYAnchor.constraint(equalTo: testButton.centerYAnchor).isActive = true
-        statusLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: testButton.trailingAnchor, multiplier: 1).isActive = true
+        statusLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: clearSessionButton.trailingAnchor, multiplier: 1).isActive = true
 
         res.bottomAnchor.constraint(equalTo: testButton.bottomAnchor, constant: 32).isActive = true
 
@@ -140,6 +150,25 @@ class NavidromePage: NSViewController {
 
     @objc private func passwordChanged(_ sender: NSTextField) {
         naviolaSettings.password = sender.stringValue.isEmpty ? nil : sender.stringValue
+    }
+
+    @objc private func clearSession() {
+        // Clear all cookies for the Navidrome server
+        if let url = URL(string: naviolaSettings.serverURL ?? ""),
+           let host = url.host {
+            let storage = HTTPCookieStorage.shared
+            for cookie in storage.cookies ?? [] {
+                if cookie.domain.contains(host) {
+                    storage.deleteCookie(cookie)
+                }
+            }
+        }
+
+        // Also reset URLSession caches
+        URLSession.shared.reset {}
+
+        statusLabel.textColor = .systemGreen
+        statusLabel.stringValue = NSLocalizedString("Session cleared", tableName: "Settings", comment: "Navidrome status")
     }
 
     @objc private func testConnection() {

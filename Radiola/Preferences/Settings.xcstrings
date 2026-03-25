@@ -250,6 +250,9 @@
         }
       }
     },
+    "Clear Session" : {
+      "comment" : "Navidrome settings button"
+    },
     "cloud and local stations" : {
       "comment" : "Settings combobox item",
       "extractionState" : "stale",
@@ -963,6 +966,9 @@
     },
     "Server URL:" : {
       "comment" : "Navidrome settings label"
+    },
+    "Session cleared" : {
+      "comment" : "Navidrome status"
     },
     "Show a tooltip with the radiostation and song" : {
       "comment" : "Settings label",

@@ -52,7 +52,7 @@
                                         <constraints>
                                             <constraint firstAttribute="bottom" secondItem="2x7-gi-IyC" secondAttribute="bottom" id="K7A-ye-eh8"/>
                                             <constraint firstItem="2x7-gi-IyC" firstAttribute="leading" secondItem="PIo-NM-taC" secondAttribute="leading" id="SXc-aA-g73"/>
-                                            <constraint firstAttribute="height" constant="52" id="TZd-Hk-xcV"/>
+                                            <constraint firstAttribute="height" constant="72" id="TZd-Hk-xcV"/>
                                             <constraint firstAttribute="trailing" secondItem="2x7-gi-IyC" secondAttribute="trailing" id="sMG-Q7-v07"/>
                                         </constraints>
                                     </customView>
