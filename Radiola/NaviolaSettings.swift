@@ -25,20 +25,14 @@ class NaviolaSettings {
         set { data.set(newValue, forKey: usernameKey) }
     }
 
-    /// Password is stored in Keychain via NavidromeAuth, not UserDefaults.
+    // TODO: Switch to Keychain (NavidromeAuth) for signed release builds.
+    // Using UserDefaults for dev to avoid Keychain "Always Allow" prompts
+    // that unsigned apps can't persist.
+    private let passwordKey = "NavidromePassword"
+
     var password: String? {
-        get {
-            guard let username = username, !username.isEmpty else { return nil }
-            return NavidromeAuth.shared.loadPassword(forUsername: username)
-        }
-        set {
-            guard let username = username, !username.isEmpty else { return }
-            if let newValue = newValue, !newValue.isEmpty {
-                NavidromeAuth.shared.savePassword(newValue, forUsername: username)
-            } else {
-                NavidromeAuth.shared.deletePassword(forUsername: username)
-            }
-        }
+        get { data.string(forKey: passwordKey) }
+        set { data.set(newValue, forKey: passwordKey) }
     }
 
     var isConfigured: Bool {
