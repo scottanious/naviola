@@ -2163,6 +2163,9 @@
     "Refresh" : {
       "comment" : "Navidrome search panel"
     },
+    "Remove" : {
+      "comment" : "Button title"
+    },
     "Remove station" : {
       "comment" : "Button title",
       "localizations" : {

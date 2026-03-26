@@ -26,17 +26,16 @@ class NaviolaMenuBuilder {
             menu.addItem(createMenuItem(for: item))
         }
 
-        // Groups as submenus
+        // Groups as labeled sections (like radio station groups)
         for group in store.groups {
             guard !group.items.isEmpty else { continue }
 
-            let groupMenuItem = NSMenuItem(title: "  " + group.title, action: nil, keyEquivalent: "")
-            let submenu = NSMenu()
+            let groupLabel = NSMenuItem(title: group.title, action: nil, keyEquivalent: "")
+            menu.addItem(groupLabel)
+
             for item in group.items {
-                submenu.addItem(createMenuItem(for: item, indent: false))
+                menu.addItem(createMenuItem(for: item))
             }
-            groupMenuItem.submenu = submenu
-            menu.addItem(groupMenuItem)
         }
     }
 

@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - NaviolaPinnedItem
 
-struct NaviolaPinnedItem: Codable, Identifiable {
+class NaviolaPinnedItem: Codable, Identifiable {
     let id: UUID
     let type: PinnedItemType
     let title: String
@@ -39,7 +39,7 @@ struct NaviolaPinnedItem: Codable, Identifiable {
 
 // MARK: - NaviolaPinnedGroup
 
-struct NaviolaPinnedGroup: Codable, Identifiable {
+class NaviolaPinnedGroup: Codable, Identifiable {
     let id: UUID
     var title: String
     var items: [NaviolaPinnedItem]

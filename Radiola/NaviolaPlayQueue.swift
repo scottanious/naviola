@@ -89,6 +89,7 @@ class NaviolaPlayQueue: ObservableObject {
         Task { @MainActor in
             do {
                 var allTracks = [NavidromeTrack]()
+                debug("[PlayQueue] Resolving pinned item: \(item.type.rawValue) '\(item.title)' id=\(item.subsonicId)")
 
                 switch item.type {
                 case .album:
@@ -107,10 +108,15 @@ class NaviolaPlayQueue: ObservableObject {
                     allTracks = (playlist.entry ?? []).map { NavidromeTrack(from: $0, client: client) }
 
                 case .genre:
-                    let albums = try await client.getAlbumList2(type: "byGenre", size: 50, genre: item.subsonicId)
+                    debug("[PlayQueue] Fetching genre albums for '\(item.subsonicId)'")
+                    let albums = try await client.getAlbumList2(type: "byGenre", size: 10, genre: item.subsonicId)
+                    debug("[PlayQueue] Got \(albums.count) albums for genre")
                     for album in albums {
+                        debug("[PlayQueue] Fetching tracks for album '\(album.name)' id=\(album.id)")
                         let detail = try await client.getAlbum(id: album.id)
-                        allTracks.append(contentsOf: (detail.song ?? []).map { NavidromeTrack(from: $0, client: client) })
+                        let tracks = (detail.song ?? []).map { NavidromeTrack(from: $0, client: client) }
+                        debug("[PlayQueue] Got \(tracks.count) tracks")
+                        allTracks.append(contentsOf: tracks)
                     }
 
                 case .track:
@@ -122,6 +128,7 @@ class NaviolaPlayQueue: ObservableObject {
                 if !allTracks.isEmpty {
                     playTracks(allTracks)
                 }
+                debug("[PlayQueue] Resolved \(allTracks.count) tracks")
             } catch {
                 warning("Failed to resolve pinned item \(item.title): \(error)")
             }

@@ -222,9 +222,9 @@ class ToolbarPlayView: NSViewController {
             repeatButton.widthAnchor.constraint(equalToConstant: smallBtnSize),
             repeatButton.heightAnchor.constraint(equalToConstant: smallBtnSize),
 
-            // Labels extend to view edge; constrained by mode buttons when visible
+            // Labels extend independently to view edge
             songLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
-            stationLabel.trailingAnchor.constraint(equalTo: songLabel.trailingAnchor),
+            stationLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
             onlyStationLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -8),
 
             // Row 2: Seekable slider + time label (below transport)

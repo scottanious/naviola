@@ -37,6 +37,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
     private var localStationsDelegate: LocalStationDelegate!
     private var internetStationsDelegate: InternetStationDelegate!
     private var navidromeStationsDelegate: NavidromeStationDelegate!
+    private var pinnedStationsDelegate: PinnedStationDelegate!
     private var historyDelegate: HistoryDelegate!
 
     private var toolBox: NSView? { didSet { placeToolbox() } }
@@ -63,6 +64,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         localStationsDelegate = LocalStationDelegate(outlineView: stationsTree)
         internetStationsDelegate = InternetStationDelegate(outlineView: stationsTree)
         navidromeStationsDelegate = NavidromeStationDelegate(outlineView: stationsTree)
+        pinnedStationsDelegate = PinnedStationDelegate(outlineView: stationsTree)
         historyDelegate = HistoryDelegate(outlineView: stationsTree)
 
         stationsTree.style = .inset
@@ -338,9 +340,13 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             setFocus(listId: listId, toTree: !list.items.isEmpty)
             updateStateIndicator(state: list.state)
         } else if let list = AppState.shared.navidromeStations.find(byId: listId) {
-            setNavidromeStationList(list: list)
-            setFocus(listId: listId, toTree: !list.items.isEmpty || !list.browseItems.isEmpty)
-            updateNavidromeStateIndicator(state: list.state)
+            if list.provider.category == .pinned {
+                setPinnedStationList()
+            } else {
+                setNavidromeStationList(list: list)
+                setFocus(listId: listId, toTree: !list.items.isEmpty || !list.browseItems.isEmpty)
+                updateNavidromeStateIndicator(state: list.state)
+            }
         }
     }
 
@@ -464,6 +470,41 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         listStateSink = list.$state.sink(receiveValue: updateStateIndicator)
 
         self.searchPanel = searchPanel
+    }
+
+    // Naviola: Set up Pinned view (mirrors My Stations pattern)
+    private func setPinnedStationList() {
+        stationsTree.delegate = pinnedStationsDelegate
+        stationsTree.dataSource = pinnedStationsDelegate
+        pinnedStationsDelegate.refresh()
+
+        stateIndicator.isHidden = true
+        stateIndicatorSpinner.stopAnimation(nil)
+
+        // Use a minimal search panel (Refresh button to reload pinned items)
+        let pinnedPanel = NavidromeSearchPanel(provider: NavidromeProvider(.pinned))
+        pinnedPanel.target = self
+        pinnedPanel.action = #selector(refreshPinned)
+        searchPanel = pinnedPanel
+
+        let toolBox = PinnedToolBox()
+        toolBox.addGroupButton.target = self
+        toolBox.addGroupButton.action = #selector(addPinnedGroup)
+        toolBox.delButton.target = self
+        toolBox.delButton.action = #selector(removePinnedItem)
+        self.toolBox = toolBox
+    }
+
+    @objc private func addPinnedGroup() {
+        pinnedStationsDelegate.addGroup(title: NSLocalizedString("New Group", comment: "Default group name"))
+    }
+
+    @objc private func removePinnedItem() {
+        pinnedStationsDelegate.removeSelected(indexes: stationsTree.selectedRowIndexes)
+    }
+
+    @objc private func refreshPinned() {
+        pinnedStationsDelegate.refresh()
     }
 
     // Naviola: Set up Navidrome album list view
@@ -593,6 +634,12 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
      * ****************************************/
     @objc func doubleClickRow(sender: AnyObject) {
         let clickedItem = stationsTree.item(atRow: stationsTree.clickedRow)
+
+        // Naviola: double-click a pinned item → play via queue
+        if let pin = clickedItem as? NaviolaPinnedItem {
+            NaviolaPlayQueue.shared.play(item: pin)
+            return
+        }
 
         // Naviola: double-click a track → load parent's tracks into play queue
         if let track = clickedItem as? NavidromeTrack {
