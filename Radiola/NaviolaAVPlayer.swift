@@ -1,6 +1,6 @@
 //
 //  NaviolaAVPlayer.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — AVFoundation-based audio player for Navidrome streams.
 //  Handles MP3/AAC/FLAC/Opus files correctly, including those with

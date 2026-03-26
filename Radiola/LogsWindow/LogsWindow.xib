@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="LogsWindow" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="LogsWindow" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="copyButton" destination="j6I-iz-KWW" id="4bV-cn-vAe"/>
                 <outlet property="logsView" destination="cb9-VM-Gxe" id="z21-Tp-mwW"/>

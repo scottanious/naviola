@@ -1,6 +1,6 @@
 //
 //  NavidromeSearchPanel.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Search/filter panel for Navidrome browsing.
 //  Adapts based on category: segmented sort for Albums, search field for Search,

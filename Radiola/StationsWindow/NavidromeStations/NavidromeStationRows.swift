@@ -1,6 +1,6 @@
 //
 //  NavidromeStationRows.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Row views for Navidrome albums and tracks.
 //  Parallel to InternetStationRows.swift.

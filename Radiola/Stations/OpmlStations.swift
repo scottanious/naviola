@@ -1,6 +1,6 @@
 //
 //  OpmlStations.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 25.08.2024.
 //
@@ -154,7 +154,7 @@ class OpmlStations: StationList {
             return
         }
 
-        let container = "com.github.SokoloffA.Radiola"
+        let container = "com.naviola.app"
         let dir = home
             .appendingPathComponent("Library")
             .appendingPathComponent("Containers")

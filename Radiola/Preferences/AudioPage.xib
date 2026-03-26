@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="AudioPage" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="AudioPage" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="deviceCombobox" destination="PaD-M5-caT" id="xbs-gb-wrq"/>
                 <outlet property="deviceLabel" destination="ddb-mV-91W" id="ATk-Re-CcD"/>

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="Radiola"
+APP_NAME="Naviola"
 SRC_DIR="."
 BUILD_DIR="./build"
 TEAM_ID="${TEAM_ID:-635H9TYSZJ}"
 CODE_SIGN_IDENTITY="Developer ID Application: Alex Sokolov (635H9TYSZJ)"
 NOTARY_KEYCHAIN_PROFILE="NotaryTool"
-PROVISIONING_PROFILE="com.github.SokoloffA.Radiola"
+PROVISIONING_PROFILE="com.naviola.app"
 
 ##############################
 SCHEME="${APP_NAME}"

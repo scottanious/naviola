@@ -1,6 +1,6 @@
 //
 //  NaviolaPinnedItems.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Pinned items with group organization and JSON persistence.
 //

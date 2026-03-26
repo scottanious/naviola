@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="SidebarSecondLevelView" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="SidebarSecondLevelView" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="iconView" destination="xjf-xA-Blq" id="v02-QZ-Bhd"/>
                 <outlet property="titleLabel" destination="whY-BC-4cz" id="wXe-lr-DJm"/>

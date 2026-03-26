@@ -1,61 +1,61 @@
 {
   "images" : [
     {
-      "filename" : "radiola-016.png",
+      "filename" : "naviola-016.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
-      "filename" : "radiola-016@2.png",
+      "filename" : "naviola-016@2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
-      "filename" : "radiola-032.png",
+      "filename" : "naviola-032.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
-      "filename" : "radiola-032@2.png",
+      "filename" : "naviola-032@2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
-      "filename" : "radiola-128.png",
+      "filename" : "naviola-128.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
-      "filename" : "radiola-128@2.png",
+      "filename" : "naviola-128@2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "radiola-256.png",
+      "filename" : "naviola-256.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "radiola-256@2.png",
+      "filename" : "naviola-256@2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "radiola-512.png",
+      "filename" : "naviola-512.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "radiola-512@2.png",
+      "filename" : "naviola-512@2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

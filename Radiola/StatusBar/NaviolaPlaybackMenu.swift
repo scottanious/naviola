@@ -1,6 +1,6 @@
 //
 //  NaviolaPlaybackMenu.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Compact playback and volume controls as a unified section
 //  in the status bar menu.
@@ -11,6 +11,23 @@ import Cocoa
 // MARK: - NaviolaPlaybackMenu
 
 class NaviolaPlaybackMenu {
+    /// Add a "Resume" menu item when a queue is suspended.
+    static func addResumeItem(to menu: NSMenu) {
+        let queue = NaviolaPlayQueue.shared
+        guard queue.canResume else { return }
+
+        menu.addItem(NSMenuItem.separator())
+        let title = NSLocalizedString("Resume", comment: "Status bar menu item")
+        let desc = queue.resumeDescription ?? ""
+        let item = NSMenuItem(title: "  \(title): \(desc)", action: #selector(resumeClicked), keyEquivalent: "")
+        item.target = self
+        menu.addItem(item)
+    }
+
+    @objc private static func resumeClicked() {
+        NaviolaPlayQueue.shared.resume()
+    }
+
     static func addControls(to menu: NSMenu, showVolume: Bool, showMute: Bool) {
         let queue = NaviolaPlayQueue.shared
         guard queue.isActive else { return }

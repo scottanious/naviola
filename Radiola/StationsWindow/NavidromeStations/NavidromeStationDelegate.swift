@@ -1,6 +1,6 @@
 //
 //  NavidromeStationDelegate.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — NSOutlineView delegate/datasource for Navidrome browsing.
 //  Handles albums, artists, genres, playlists — all with expandable children.

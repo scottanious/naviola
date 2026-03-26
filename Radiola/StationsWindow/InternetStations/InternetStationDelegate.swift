@@ -1,6 +1,6 @@
 //
 //  InternetStationsDelegate.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Aleksandr Sokolov on 15.01.2024.
 //

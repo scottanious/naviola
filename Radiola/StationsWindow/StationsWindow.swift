@@ -1,6 +1,6 @@
 //
 //  StationsWindow.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Aleksandr Sokolov on 05.07.2022.
 //
@@ -38,6 +38,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
     private var internetStationsDelegate: InternetStationDelegate!
     private var navidromeStationsDelegate: NavidromeStationDelegate!
     private var pinnedStationsDelegate: PinnedStationDelegate!
+    private var nowPlayingDelegate: NowPlayingDelegate!
     private var historyDelegate: HistoryDelegate!
 
     private var toolBox: NSView? { didSet { placeToolbox() } }
@@ -65,6 +66,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         internetStationsDelegate = InternetStationDelegate(outlineView: stationsTree)
         navidromeStationsDelegate = NavidromeStationDelegate(outlineView: stationsTree)
         pinnedStationsDelegate = PinnedStationDelegate(outlineView: stationsTree)
+        nowPlayingDelegate = NowPlayingDelegate(outlineView: stationsTree)
         historyDelegate = HistoryDelegate(outlineView: stationsTree)
 
         stationsTree.style = .inset
@@ -90,21 +92,23 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
     private func initSideBar() {
         let appState = AppState.shared
 
-        sideBar.addGroup(title: NSLocalizedString("My lists", comment: "Sidebar group"))
+        sideBar.addGroup(title: NSLocalizedString("My Pins", comment: "Sidebar group"))
+        sideBar.addItem(id: appState.navidromePinnedList.id, title: appState.navidromePinnedList.title, icon: appState.navidromePinnedList.icon)
         for list in appState.localStations {
-            sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
+            sideBar.addItem(id: list.id, title: NSLocalizedString("Radio Pins", comment: "Sidebar item"), icon: list.icon)
         }
 
-        sideBar.addGroup(title: NSLocalizedString("Radio browser", comment: "Sidebar group"))
+        sideBar.addGroup(title: NSLocalizedString("Radio Browser", comment: "Sidebar group"))
         for list in appState.internetStations {
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
         }
 
         // Naviola: Navidrome browsing section
-        sideBar.addGroup(title: NSLocalizedString("Naviola", comment: "Sidebar group"))
+        sideBar.addGroup(title: NSLocalizedString("Navidrome", comment: "Sidebar group"))
         for list in appState.navidromeStations {
             sideBar.addItem(id: list.id, title: list.title, icon: list.icon)
         }
+        sideBar.addItem(id: appState.naviolaNowPlayingId, title: NSLocalizedString("Now Playing", comment: "Sidebar item"), icon: "play.circle")
 
         sideBar.addGroup(title: NSLocalizedString("History", comment: "Sidebar group"))
         sideBar.addItem(id: historyListId, title: NSLocalizedString("History", comment: "Sidebar item"), icon: "clock")
@@ -327,7 +331,10 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             return
         }
 
-        if listId == historyListId {
+        if listId == AppState.shared.naviolaNowPlayingId {
+            setNowPlayingList()
+            updateStateIndicator(state: .notLoaded)
+        } else if listId == historyListId {
             setHistoryList()
             setFocus(listId: listId, toTree: true)
             updateStateIndicator(state: .notLoaded)
@@ -339,14 +346,12 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             setInternetStationList(list: list)
             setFocus(listId: listId, toTree: !list.items.isEmpty)
             updateStateIndicator(state: list.state)
+        } else if listId == AppState.shared.navidromePinnedList.id {
+            setPinnedStationList()
         } else if let list = AppState.shared.navidromeStations.find(byId: listId) {
-            if list.provider.category == .pinned {
-                setPinnedStationList()
-            } else {
-                setNavidromeStationList(list: list)
-                setFocus(listId: listId, toTree: !list.items.isEmpty || !list.browseItems.isEmpty)
-                updateNavidromeStateIndicator(state: list.state)
-            }
+            setNavidromeStationList(list: list)
+            setFocus(listId: listId, toTree: !list.items.isEmpty || !list.browseItems.isEmpty)
+            updateNavidromeStateIndicator(state: list.state)
         }
     }
 
@@ -440,7 +445,7 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         dialog.allowsOtherFileTypes = true
         dialog.canCreateDirectories = true
         dialog.isExtensionHidden = false
-        dialog.nameFieldStringValue = "RadiolaHistory-\(dateStr)"
+        dialog.nameFieldStringValue = "NaviolaHistory-\(dateStr)"
 
         dialog.beginSheetModal(for: window) { result in
             guard result == .OK, let url = dialog.url else { return }
@@ -470,6 +475,24 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
         listStateSink = list.$state.sink(receiveValue: updateStateIndicator)
 
         self.searchPanel = searchPanel
+    }
+
+    // Naviola: Set up Now Playing queue view (read-only)
+    private func setNowPlayingList() {
+        stationsTree.delegate = nowPlayingDelegate
+        stationsTree.dataSource = nowPlayingDelegate
+        nowPlayingDelegate.refresh()
+
+        stateIndicator.isHidden = true
+        stateIndicatorSpinner.stopAnimation(nil)
+        searchPanel = nil
+        toolBox = nil
+
+        if !NaviolaPlayQueue.shared.isActive {
+            stateIndicatorText.stringValue = NSLocalizedString("No tracks in queue", comment: "Now Playing placeholder")
+            stateIndicator.isHidden = false
+            stateIndicatorSpinner.isHidden = true
+        }
     }
 
     // Naviola: Set up Pinned view (mirrors My Stations pattern)
@@ -696,10 +719,10 @@ class StationsWindow: NSWindowController, NSWindowDelegate, NSSplitViewDelegate 
             return
         }
 
-        // Default: play single station (upstream behavior)
+        // Default: play single station (radio — suspend Navidrome queue if active)
         guard let station = clickedItem as? Station else { return }
         if player.station?.id == station.id && player.isPlaying { return }
-        NaviolaPlayQueue.shared.stop()
+        NaviolaPlayQueue.shared.suspend()
         player.station = station
         player.play()
     }
@@ -859,7 +882,7 @@ extension StationsWindow: NSUserInterfaceValidations {
         dialog.allowsOtherFileTypes = true
         dialog.canCreateDirectories = true
         dialog.isExtensionHidden = false
-        dialog.nameFieldStringValue = "RadiolaStations[\(stations.title)]"
+        dialog.nameFieldStringValue = "NaviolaStations[\(stations.title)]"
 
         dialog.beginSheetModal(for: window) { result in
             guard result == .OK, let url = dialog.url else { return }
@@ -887,7 +910,7 @@ extension StationsWindow: NSUserInterfaceValidations {
         dialog.allowedFileTypes = ["opml"]
         dialog.allowsOtherFileTypes = true
         dialog.isExtensionHidden = false
-        dialog.nameFieldStringValue = "RadiolaStations"
+        dialog.nameFieldStringValue = "NaviolaStations"
 
         dialog.allowsMultipleSelection = false
         dialog.canChooseDirectories = false

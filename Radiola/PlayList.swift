@@ -1,6 +1,6 @@
 //
 //  PlayList.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 29.06.2025.
 //

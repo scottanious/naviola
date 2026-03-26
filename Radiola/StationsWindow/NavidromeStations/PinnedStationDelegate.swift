@@ -1,6 +1,6 @@
 //
 //  PinnedStationDelegate.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Delegate for the Pinned sidebar view.
 //  Mirrors LocalStationDelegate patterns: drag-drop, toolbox, groups.

@@ -1,6 +1,6 @@
 //
 //  NaviolaPlayerMetadata.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Surfaces structured metadata from NavidromeTrack to the Player
 //  and MPNowPlayingInfoCenter. FFPlayer's ICY stream metadata works for radio

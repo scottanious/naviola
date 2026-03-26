@@ -1,6 +1,6 @@
 //
 //  Types.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 11.05.2023.
 //

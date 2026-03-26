@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "394F8A3728739339005EA7FA"
-               BuildableName = "Radiola.app"
-               BlueprintName = "Radiola"
+               BuildableName = "Naviola.app"
+               BlueprintName = "Naviola"
                ReferencedContainer = "container:Radiola.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -34,8 +34,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3959DBA52BFCE6A50032A1BA"
-               BuildableName = "RadiolaTests.xctest"
-               BlueprintName = "RadiolaTests"
+               BuildableName = "NaviolaTests.xctest"
+               BlueprintName = "NaviolaTests"
                ReferencedContainer = "container:Radiola.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -56,8 +56,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "394F8A3728739339005EA7FA"
-            BuildableName = "Radiola.app"
-            BlueprintName = "Radiola"
+            BuildableName = "Naviola.app"
+            BlueprintName = "Naviola"
             ReferencedContainer = "container:Radiola.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -80,8 +80,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "394F8A3728739339005EA7FA"
-            BuildableName = "Radiola.app"
-            BlueprintName = "Radiola"
+            BuildableName = "Naviola.app"
+            BlueprintName = "Naviola"
             ReferencedContainer = "container:Radiola.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

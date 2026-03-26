@@ -1,6 +1,6 @@
 //
 //  RadioBrowserStatus.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 04.12.2023.
 //

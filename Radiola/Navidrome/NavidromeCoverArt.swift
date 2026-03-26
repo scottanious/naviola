@@ -1,6 +1,6 @@
 //
 //  NavidromeCoverArt.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Async cover art loading with in-memory cache.
 //

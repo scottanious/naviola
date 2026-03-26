@@ -1,6 +1,6 @@
 //
 //  FFPlayer.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 08.06.2025.
 //

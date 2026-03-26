@@ -1,6 +1,6 @@
 //
 //  TrackMetadata.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 26.05.2024.
 //

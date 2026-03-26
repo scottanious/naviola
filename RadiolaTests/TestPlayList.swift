@@ -1,11 +1,11 @@
 //
 //  TestPlayList.swift
-//  RadiolaTests
+//  NaviolaTests
 //
 //  Created by Alex Sokolov on 14.02.2026.
 //
 
-@testable import Radiola
+@testable import Naviola
 import XCTest
 
 extension RadiolaTests {

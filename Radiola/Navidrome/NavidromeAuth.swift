@@ -1,6 +1,6 @@
 //
 //  NavidromeAuth.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Keychain credential storage and Subsonic auth parameter generation.
 //

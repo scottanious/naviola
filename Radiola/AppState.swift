@@ -1,6 +1,6 @@
 //
 //  AppState.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Aleksandr Sokolov on 01.12.2023.
 //
@@ -26,7 +26,7 @@ fileprivate class DefaultStation: Station {
 fileprivate let defaultOpmlListTitle = NSLocalizedString("My stations", comment: "Station list name")
 fileprivate let defaultOpmlListIcon = "music.house"
 
-fileprivate let opmlDirectoryName = "com.github.SokoloffA.Radiola/"
+fileprivate let opmlDirectoryName = "com.naviola.app/"
 fileprivate let opmlFileName = "bookmarks.opml"
 
 fileprivate func opmlFilePath() -> URL {
@@ -78,15 +78,20 @@ class AppState: ObservableObject {
         InternetStationList(title: NSLocalizedString("By country", comment: "Internet station list"), icon: "globe", provider: RadioBrowserProvider(.byCountry)),
     ]
 
-    // Naviola: Navidrome browsing categories (Pinned first)
+    // Naviola: Navidrome Pins (shown in My Lists section)
+    let navidromePinnedList = NavidromeAlbumList(title: NSLocalizedString("Navidrome Pins", comment: "Sidebar item"), icon: "pin.fill", provider: NavidromeProvider(.pinned))
+
+    // Naviola: Navidrome browsing categories
     @Published var navidromeStations: [NavidromeAlbumList] = [
-        NavidromeAlbumList(title: NSLocalizedString("Pinned", comment: "Navidrome category"), icon: "pin.fill", provider: NavidromeProvider(.pinned)),
         NavidromeAlbumList(title: NSLocalizedString("Albums", comment: "Navidrome category"), icon: "square.stack", provider: NavidromeProvider(.albums)),
         NavidromeAlbumList(title: NSLocalizedString("Artists", comment: "Navidrome category"), icon: "music.mic", provider: NavidromeProvider(.artists)),
         NavidromeAlbumList(title: NSLocalizedString("Genres", comment: "Navidrome category"), icon: "guitars", provider: NavidromeProvider(.genres)),
         NavidromeAlbumList(title: NSLocalizedString("Playlists", comment: "Navidrome category"), icon: "music.note.list", provider: NavidromeProvider(.playlists)),
         NavidromeAlbumList(title: NSLocalizedString("Search", comment: "Navidrome category"), icon: "magnifyingglass", provider: NavidromeProvider(.search)),
     ]
+
+    // Naviola: Now Playing queue view (stable ID)
+    let naviolaNowPlayingId = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
 
     public var history = History()
 

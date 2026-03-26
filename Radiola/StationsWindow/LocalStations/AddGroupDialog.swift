@@ -1,6 +1,6 @@
 //
 //  AddStationDialog.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Aleksandr Sokolov on 06.07.2022.
 //

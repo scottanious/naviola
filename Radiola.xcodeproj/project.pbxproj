@@ -118,6 +118,7 @@
 		CC0001012F40D0010000000A /* NavidromeSearchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */; };
 		AA0003012D60E00100000002 /* PinnedStationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003012D60E00100000001 /* PinnedStationDelegate.swift */; };
 		AA0003012D60E00100000004 /* PinnedToolBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003012D60E00100000003 /* PinnedToolBox.swift */; };
+		FF0001013D70F00100000002 /* NowPlayingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001013D70F00100000001 /* NowPlayingDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,7 +151,7 @@
 		394ABCAA2A9CA25500E2B6E9 /* RadioBrowserStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioBrowserStations.swift; sourceTree = "<group>"; };
 		394C68772CFC7D30004EAE1C /* LogsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsWindow.swift; sourceTree = "<group>"; };
 		394C68782CFC7D30004EAE1C /* LogsWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LogsWindow.xib; sourceTree = "<group>"; };
-		394F8A3828739339005EA7FA /* Radiola.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radiola.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		394F8A3828739339005EA7FA /* Naviola.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naviola.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		394F8A3B28739339005EA7FA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		394F8A402873933A005EA7FA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		394F8A452873933A005EA7FA /* Radiola.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Radiola.entitlements; sourceTree = "<group>"; };
@@ -160,7 +161,7 @@
 		394F8A6228739A15005EA7FA /* StationsWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StationsWindow.xib; sourceTree = "<group>"; };
 		394F8A6C2873A2FE005EA7FA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		39541B32287623F200A2A5CB /* AddStationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStationDialog.swift; sourceTree = "<group>"; };
-		3959DBA62BFCE6A50032A1BA /* RadiolaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RadiolaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3959DBA62BFCE6A50032A1BA /* NaviolaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NaviolaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3959DBA82BFCE6A50032A1BA /* RadiolaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadiolaTests.swift; sourceTree = "<group>"; };
 		3959DBAF2BFCE6C30032A1BA /* TestStationMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestStationMerger.swift; sourceTree = "<group>"; };
 		3959DBB12BFCE7580032A1BA /* StationsMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationsMerger.swift; sourceTree = "<group>"; };
@@ -245,6 +246,7 @@
 		CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavidromeSearchPanel.swift; sourceTree = "<group>"; };
 		AA0003012D60E00100000001 /* PinnedStationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedStationDelegate.swift; sourceTree = "<group>"; };
 		AA0003012D60E00100000003 /* PinnedToolBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedToolBox.swift; sourceTree = "<group>"; };
+		FF0001013D70F00100000001 /* NowPlayingDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,8 +333,8 @@
 		394F8A3928739339005EA7FA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				394F8A3828739339005EA7FA /* Radiola.app */,
-				3959DBA62BFCE6A50032A1BA /* RadiolaTests.xctest */,
+				394F8A3828739339005EA7FA /* Naviola.app */,
+				3959DBA62BFCE6A50032A1BA /* NaviolaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -527,6 +529,7 @@
 				CC0001012F40D00100000009 /* NavidromeSearchPanel.swift */,
 				AA0003012D60E00100000001 /* PinnedStationDelegate.swift */,
 				AA0003012D60E00100000003 /* PinnedToolBox.swift */,
+				FF0001013D70F00100000001 /* NowPlayingDelegate.swift */,
 			);
 			path = NavidromeStations;
 			sourceTree = "<group>";
@@ -536,7 +539,7 @@
 /* Begin PBXNativeTarget section */
 		394F8A3728739339005EA7FA /* Radiola */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 394F8A482873933A005EA7FA /* Build configuration list for PBXNativeTarget "Radiola" */;
+			buildConfigurationList = 394F8A482873933A005EA7FA /* Build configuration list for PBXNativeTarget "Naviola" */;
 			buildPhases = (
 				394F8A3428739339005EA7FA /* Sources */,
 				394F8A3528739339005EA7FA /* Frameworks */,
@@ -546,14 +549,14 @@
 			);
 			dependencies = (
 			);
-			name = Radiola;
+			name = Naviola;
 			packageProductDependencies = (
 				39E8DFD4288F316A00082467 /* Sparkle */,
 				393F9C0D2DFDA81700870055 /* FFAudio */,
 				3970F46B2E910852001A9AC1 /* CSV */,
 			);
-			productName = Radiola;
-			productReference = 394F8A3828739339005EA7FA /* Radiola.app */;
+			productName = Naviola;
+			productReference = 394F8A3828739339005EA7FA /* Naviola.app */;
 			productType = "com.apple.product-type.application";
 		};
 		3959DBA52BFCE6A50032A1BA /* RadiolaTests */ = {
@@ -569,9 +572,9 @@
 			dependencies = (
 				3959DBAB2BFCE6A50032A1BA /* PBXTargetDependency */,
 			);
-			name = RadiolaTests;
-			productName = RadiolaTests;
-			productReference = 3959DBA62BFCE6A50032A1BA /* RadiolaTests.xctest */;
+			name = NaviolaTests;
+			productName = NaviolaTests;
+			productReference = 3959DBA62BFCE6A50032A1BA /* NaviolaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -592,7 +595,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 394F8A3328739339005EA7FA /* Build configuration list for PBXProject "Radiola" */;
+			buildConfigurationList = 394F8A3328739339005EA7FA /* Build configuration list for PBXProject "Naviola" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -742,6 +745,7 @@
 				DD0002013A50A00100000006 /* NaviolaMenuBuilder.swift in Sources */,
 				EE0001013B60B00100000002 /* NaviolaPlayerMetadata.swift in Sources */,
 				EE0001013B60B00100000004 /* NaviolaPlaybackMenu.swift in Sources */,
+				FF0001013D70F00100000002 /* NowPlayingDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -924,7 +928,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.github.SokoloffA.Radiola;
+				PRODUCT_BUNDLE_IDENTIFIER = com.naviola.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -956,7 +960,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.github.SokoloffA.Radiola;
+				PRODUCT_BUNDLE_IDENTIFIER = com.naviola.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -979,12 +983,12 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokoloff.RadiolaTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.naviola.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Radiola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Radiola";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naviola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Naviola";
 			};
 			name = Debug;
 		};
@@ -1003,18 +1007,18 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokoloff.RadiolaTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.naviola.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Radiola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Radiola";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naviola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Naviola";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		394F8A3328739339005EA7FA /* Build configuration list for PBXProject "Radiola" */ = {
+		394F8A3328739339005EA7FA /* Build configuration list for PBXProject "Naviola" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				394F8A462873933A005EA7FA /* Debug */,
@@ -1023,7 +1027,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		394F8A482873933A005EA7FA /* Build configuration list for PBXNativeTarget "Radiola" */ = {
+		394F8A482873933A005EA7FA /* Build configuration list for PBXNativeTarget "Naviola" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				394F8A492873933A005EA7FA /* Debug */,

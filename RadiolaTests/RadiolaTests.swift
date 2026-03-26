@@ -1,11 +1,11 @@
 //
 //  RadiolaTests.swift
-//  RadiolaTests
+//  NaviolaTests
 //
 //  Created by Alex Sokolov on 21.05.2024.
 //
 
-@testable import Radiola
+@testable import Naviola
 import XCTest
 
 enum RadiolaTestsError: Error, LocalizedError {

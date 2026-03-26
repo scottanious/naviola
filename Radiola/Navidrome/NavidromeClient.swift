@@ -1,6 +1,6 @@
 //
 //  NavidromeClient.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Subsonic/Navidrome API client.
 //

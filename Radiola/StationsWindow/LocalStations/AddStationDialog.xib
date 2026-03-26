@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="AddStationDialog" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="AddStationDialog" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="cancelButton" destination="w8U-7I-AbI" id="wZS-cD-QLp"/>
                 <outlet property="messageLabel" destination="1bL-ei-Gpa" id="3cT-xD-NTO"/>

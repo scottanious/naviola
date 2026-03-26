@@ -1,11 +1,11 @@
 //
 //  TestTrackMetadata.swift
-//  RadiolaTests
+//  NaviolaTests
 //
 //  Created by Alex Sokolov on 26.05.2024.
 //
 
-@testable import Radiola
+@testable import Naviola
 import XCTest
 
 extension RadiolaTests {

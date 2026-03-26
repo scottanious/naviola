@@ -1,11 +1,11 @@
 //
 //  TestNavidrome.swift
-//  RadiolaTests
+//  NaviolaTests
 //
 //  Naviola — Tests for NavidromeModels, NavidromeAuth, and NavidromeClient URL construction.
 //
 
-@testable import Radiola
+@testable import Naviola
 import XCTest
 
 final class TestNavidrome: XCTestCase {

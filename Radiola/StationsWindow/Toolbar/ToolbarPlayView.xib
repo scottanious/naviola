@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="ToolbarPlayView" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="ToolbarPlayView" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="playButton" destination="ucz-hQ-b0k" id="zZh-3B-ACO"/>
                 <outlet property="songLabel" destination="Mk3-KT-01s" id="JLI-b5-Zni"/>

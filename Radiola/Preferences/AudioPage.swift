@@ -1,6 +1,6 @@
 //
 //  AudioPage.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Aleksandr Sokolov on 10.12.2022.
 //

@@ -1709,6 +1709,7 @@
     },
     "My lists" : {
       "comment" : "Sidebar group",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1765,6 +1766,9 @@
         }
       }
     },
+    "My Pins" : {
+      "comment" : "Sidebar group"
+    },
     "My stations" : {
       "comment" : "Station list name",
       "localizations" : {
@@ -1794,11 +1798,44 @@
         }
       }
     },
+    "Navidrome" : {
+      "comment" : "Sidebar group"
+    },
     "Navidrome not configured — open Settings to connect" : {
       "comment" : "Navidrome placeholder"
     },
-    "Naviola" : {
-      "comment" : "Sidebar group"
+    "Navidrome Pins" : {
+      "comment" : "Sidebar item\nStatus bar menu section"
+    },
+    "Naviola logs" : {
+      "comment" : "Window title",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naviola Protokolle"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logs di Naviola"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логи Naviola"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naviola 日志"
+          }
+        }
+      }
     },
     "New Group" : {
       "comment" : "Context menu\nDefault group name"
@@ -1862,6 +1899,9 @@
         }
       }
     },
+    "No tracks in queue" : {
+      "comment" : "Now Playing placeholder"
+    },
     "no votes" : {
       "comment" : "Internet station row",
       "localizations" : {
@@ -1920,34 +1960,37 @@
         }
       }
     },
+    "Now Playing" : {
+      "comment" : "Sidebar item"
+    },
     "OK" : {
 
     },
-    "Open Radiola…" : {
+    "Open Naviola…" : {
       "comment" : "Status bar menu item",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Radiola öffnen…"
+            "value" : "Naviola öffnen…"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apri Radiola..."
+            "value" : "Apri Naviola..."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Открыть Radiola…"
+            "value" : "Открыть Naviola…"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 Radiola…"
+            "value" : "打开 Naviola…"
           }
         }
       }
@@ -1990,9 +2033,6 @@
     },
     "Pin Album" : {
       "comment" : "Context menu"
-    },
-    "Pinned" : {
-      "comment" : "Navidrome category\nStatus bar menu section"
     },
     "Pinned — click to unpin" : {
       "comment" : "Pin button tooltip"
@@ -2101,6 +2141,7 @@
     },
     "Radio browser" : {
       "comment" : "Sidebar group",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2122,34 +2163,14 @@
         }
       }
     },
+    "Radio Browser" : {
+      "comment" : "Sidebar group"
+    },
+    "Radio Pins" : {
+      "comment" : "Sidebar item"
+    },
     "Radiola logs" : {
-      "comment" : "Window title",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Radiola Protokolle"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Logs di Radiola"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Логи Radiola"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Radiola 日志"
-          }
-        }
-      }
+      "comment" : "Window title"
     },
     "Random" : {
       "comment" : "Album sort mode"
@@ -2197,6 +2218,9 @@
     },
     "Rename Group" : {
       "comment" : "Context menu\nDialog title"
+    },
+    "Resume" : {
+      "comment" : "Status bar menu item"
     },
     "Search" : {
       "comment" : "Navidrome category"

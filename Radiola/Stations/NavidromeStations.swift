@@ -1,6 +1,6 @@
 //
 //  NavidromeStations.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Station types for Navidrome content.
 //  NavidromeTrack conforms to Station so it plugs directly into Player.

@@ -1,6 +1,6 @@
 //
 //  StatuBarController.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 27.11.2022.
 //
@@ -172,6 +172,9 @@ class StatusBarController: NSObject, NSMenuDelegate {
         // Naviola: Consolidated controls section (playback + volume)
         NaviolaPlaybackMenu.addControls(to: menu, showVolume: settings.showVolumeInMenu, showMute: settings.showMuteInMenu)
 
+        // Naviola: Resume suspended queue
+        NaviolaPlaybackMenu.addResumeItem(to: menu)
+
         // Upstream volume/mute only when no play queue active
         if !NaviolaPlayQueue.shared.isActive {
             if settings.showVolumeInMenu {
@@ -217,7 +220,7 @@ class StatusBarController: NSObject, NSMenuDelegate {
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(
-            title: NSLocalizedString("Open Radiola…", comment: "Status bar menu item"),
+            title: NSLocalizedString("Open Naviola…", comment: "Status bar menu item"),
             action: #selector(AppDelegate.showStationView(_:)),
             keyEquivalent: "r"))
 
@@ -438,6 +441,7 @@ class StatusBarController: NSObject, NSMenuDelegate {
      * ****************************************/
     @objc func stationClicked(_ sender: NSMenuItem) {
         guard let station = sender.representedObject as? Station else { return }
+        NaviolaPlayQueue.shared.suspend()
         player.switchStation(station: station)
     }
 }

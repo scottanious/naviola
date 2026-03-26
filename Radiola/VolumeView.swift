@@ -1,6 +1,6 @@
 //
 //  VolumeView.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 15.09.2024.
 //

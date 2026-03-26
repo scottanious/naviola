@@ -1,6 +1,6 @@
 //
 //  MediaKeysController.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 22.07.2023.
 //

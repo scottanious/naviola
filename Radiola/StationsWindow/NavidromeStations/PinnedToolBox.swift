@@ -1,6 +1,6 @@
 //
 //  PinnedToolBox.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Toolbox for the Pinned view, mirroring LocalStationToolBox.
 //

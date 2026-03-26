@@ -1,6 +1,6 @@
 //
 //  StationsMerger.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 21.05.2024.
 //

@@ -1,6 +1,6 @@
 //
 //  ToolbarPlayView.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Programmatic toolbar with transport controls, track info,
 //  repeat/shuffle toggles, and live progress bar.

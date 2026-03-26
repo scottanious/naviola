@@ -1,6 +1,6 @@
 //
 //  NaviolaPlayQueue.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Sequential playback queue with auto-advance.
 //  Sits alongside Player, observes state changes to advance
@@ -75,8 +75,15 @@ class NaviolaPlayQueue: ObservableObject {
     }
 
     /// Load tracks and start playing from the given index.
+    /// Suspends the current queue if one is active (for resume).
     func playTracks(_ tracks: [NavidromeTrack], startingAt index: Int = 0) {
         guard !tracks.isEmpty, index < tracks.count else { return }
+
+        // Suspend current queue so user can resume it later
+        if isActive {
+            suspendedTracks = self.tracks
+            suspendedIndex = currentIndex
+        }
 
         self.tracks = tracks
         startTrack(at: index)
@@ -182,14 +189,51 @@ class NaviolaPlayQueue: ObservableObject {
         return true
     }
 
-    /// Clear the queue. Does not stop the currently playing track.
-    func stop() {
+    /// Suspend the queue — saves state for later resume. Used when switching to radio.
+    func suspend() {
+        guard isActive else { return }
+        suspendedTracks = tracks
+        suspendedIndex = currentIndex
         tracks = []
         currentIndex = -1
         trackStartTime = nil
         userDidPause = false
         confirmedPlaying = false
     }
+
+    /// Resume a previously suspended queue. Returns true if resumed.
+    @discardableResult
+    func resume() -> Bool {
+        guard !suspendedTracks.isEmpty, suspendedIndex >= 0, suspendedIndex < suspendedTracks.count else { return false }
+        playTracks(suspendedTracks, startingAt: suspendedIndex)
+        suspendedTracks = []
+        suspendedIndex = -1
+        return true
+    }
+
+    var canResume: Bool {
+        return !suspendedTracks.isEmpty && suspendedIndex >= 0
+    }
+
+    var resumeDescription: String? {
+        guard canResume, suspendedIndex < suspendedTracks.count else { return nil }
+        let track = suspendedTracks[suspendedIndex]
+        return "\(track.artist ?? "") — \(track.title)"
+    }
+
+    /// Clear the queue completely (no suspend).
+    func stop() {
+        tracks = []
+        currentIndex = -1
+        suspendedTracks = []
+        suspendedIndex = -1
+        trackStartTime = nil
+        userDidPause = false
+        confirmedPlaying = false
+    }
+
+    private var suspendedTracks: [NavidromeTrack] = []
+    private var suspendedIndex: Int = -1
 
     // MARK: - Auto-Advance
 

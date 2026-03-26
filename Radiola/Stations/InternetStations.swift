@@ -1,6 +1,6 @@
 //
 //  InternetStations.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 16.12.2023.
 //

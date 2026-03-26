@@ -1,6 +1,6 @@
 //
 //  NaviolaMenuBuilder.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Builds menu items for pinned Navidrome content.
 //  Supports groups as submenus.
@@ -16,7 +16,7 @@ class NaviolaMenuBuilder {
 
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(
-            title: NSLocalizedString("Pinned", comment: "Status bar menu section"),
+            title: NSLocalizedString("Navidrome Pins", comment: "Status bar menu section"),
             action: nil,
             keyEquivalent: ""
         ))

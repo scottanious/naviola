@@ -1,6 +1,6 @@
 //
 //  NotificationManager.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 03.11.2025.
 //

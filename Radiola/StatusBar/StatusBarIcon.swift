@@ -1,6 +1,6 @@
 //
 //  MainIcon.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 12.06.2023.
 //

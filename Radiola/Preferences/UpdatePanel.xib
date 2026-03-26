@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="UpdatePanel" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="UpdatePanel" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="automaticallyChecksForUpdates" destination="vSI-E8-Hi7" id="M3V-de-beM"/>
                 <outlet property="checkNowButton" destination="AC2-ML-HuS" id="q1A-4s-Ch2"/>

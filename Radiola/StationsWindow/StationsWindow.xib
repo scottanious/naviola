@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="StationsWindow" customModule="Radiola" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="StationsWindow" customModule="Naviola" customModuleProvider="target">
             <connections>
                 <outlet property="playtoolbar" destination="PIo-NM-taC" id="66S-f9-cXi"/>
                 <outlet property="searchPanelHeightConstraint" destination="0tz-K3-gVT" id="R0U-eT-xiS"/>

@@ -1,6 +1,6 @@
 //
 //  Notifications.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 02.11.2020.
 //  Copyright © 2020 Alex Sokolov. All rights reserved.

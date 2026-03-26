@@ -1,6 +1,6 @@
 //
 //  NavidromeProvider.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Provider for browsing Navidrome content.
 //  Supports albums (with sort modes), artists, genres, playlists, search, and pinned items.

@@ -1,6 +1,6 @@
 //
 //  NavidromeModels.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Codable structs for Subsonic/Navidrome JSON API responses.
 //

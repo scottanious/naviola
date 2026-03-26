@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 26.05.2020.
 //  Copyright © 2020 Alex Sokolov. All rights reserved.
@@ -17,7 +17,7 @@ extension KeyboardShortcuts.Name {
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-    private let oplDirectoryName = "com.github.SokoloffA.Radiola/"
+    private let oplDirectoryName = "com.naviola.app/"
     private let oplFileName = "bookmarks.opml"
     private let audioSytstem = AudioSytstem()
     private let mediaKeys = MediaKeysController()

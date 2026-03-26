@@ -1,6 +1,6 @@
 //
 //  SidebarTopLevelView.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 24.08.2023.
 //

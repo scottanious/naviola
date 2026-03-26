@@ -1,6 +1,6 @@
 //
 //  NaviolaSettings.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Settings for Navidrome server configuration.
 //  Separate from upstream Settings.swift to avoid merge conflicts.

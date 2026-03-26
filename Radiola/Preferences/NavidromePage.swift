@@ -1,6 +1,6 @@
 //
 //  NavidromePage.swift
-//  Radiola
+//  Naviola
 //
 //  Naviola — Preferences page for Navidrome server configuration.
 //

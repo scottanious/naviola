@@ -1,6 +1,6 @@
 //
 //  HistorySearchPanel.swift
-//  Radiola
+//  Naviola
 //
 //  Created by William Entriken on 06.12.2024.
 //

@@ -1,6 +1,6 @@
 //
 //  LocalStationRows.swift
-//  Radiola
+//  Naviola
 //
 //  Created by Alex Sokolov on 08.01.2024.
 //
