@@ -9,6 +9,8 @@
 import Cocoa
 
 class NaviolaMenuBuilder {
+    private static let menuPrefix = "  "
+
     /// Add pinned items section to the given menu.
     static func addPinnedItems(to menu: NSMenu) {
         let store = NaviolaPinnedItemStore.shared
@@ -23,25 +25,25 @@ class NaviolaMenuBuilder {
 
         // Ungrouped items
         for item in store.ungrouped {
-            menu.addItem(createMenuItem(for: item))
+            menu.addItem(createMenuItem(for: item, prefix: menuPrefix))
         }
 
         // Groups as labeled sections (like radio station groups)
         for group in store.groups {
             guard !group.items.isEmpty else { continue }
 
-            let groupLabel = NSMenuItem(title: group.title, action: nil, keyEquivalent: "")
+            let groupLabel = NSMenuItem(title: menuPrefix + group.title, action: nil, keyEquivalent: "")
             menu.addItem(groupLabel)
 
             for item in group.items {
-                menu.addItem(createMenuItem(for: item))
+                menu.addItem(createMenuItem(for: item, prefix: menuPrefix + menuPrefix + "  "))
             }
         }
     }
 
-    private static func createMenuItem(for item: NaviolaPinnedItem, indent: Bool = true) -> NSMenuItem {
+    private static func createMenuItem(for item: NaviolaPinnedItem, prefix: String = "") -> NSMenuItem {
         let menuItem = NSMenuItem(
-            title: (indent ? "  " : "") + item.title,
+            title: prefix + item.title,
             action: #selector(pinnedItemClicked(_:)),
             keyEquivalent: ""
         )

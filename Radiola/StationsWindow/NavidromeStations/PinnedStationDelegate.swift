@@ -40,11 +40,13 @@ class PinnedStationDelegate: NSObject {
 extension PinnedStationDelegate: NSOutlineViewDelegate {
     func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         if let group = item as? NaviolaPinnedGroup {
-            return PinnedGroupRow(group: group)
+            return PinnedGroupRow(group: group, store: store)
         }
 
         if let pin = item as? NaviolaPinnedItem {
-            return PinnedItemRow(item: pin)
+            return PinnedItemRow(item: pin, store: store) { [weak self] in
+                self?.refresh()
+            }
         }
 
         return nil
@@ -175,32 +177,44 @@ extension PinnedStationDelegate {
 // MARK: - PinnedGroupRow
 
 class PinnedGroupRow: NSView {
-    init(group: NaviolaPinnedGroup) {
+    private let group: NaviolaPinnedGroup
+    private let store: NaviolaPinnedItemStore
+    private let nameEdit = TextField()
+
+    init(group: NaviolaPinnedGroup, store: NaviolaPinnedItemStore) {
+        self.group = group
+        self.store = store
         super.init(frame: NSRect())
 
         let icon = NSImageView()
         icon.image = NSImage(systemSymbolName: "folder", accessibilityDescription: "Group")
         icon.image?.isTemplate = true
 
-        let label = Label()
-        label.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
-        label.stringValue = group.title
-        label.textColor = .secondaryLabelColor
+        nameEdit.placeholderString = NSLocalizedString("Group name", comment: "Pinned group placeholder")
+        nameEdit.isBordered = false
+        nameEdit.drawsBackground = false
+        nameEdit.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+        nameEdit.stringValue = group.title
+        nameEdit.isEditable = true
+        nameEdit.target = self
+        nameEdit.action = #selector(nameEdited(sender:))
 
         let countLabel = Label()
         countLabel.font = NSFont.systemFont(ofSize: 11)
         countLabel.textColor = .tertiaryLabelColor
         countLabel.stringValue = "\(group.items.count) items"
+        countLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        countLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         let separator = Separator()
 
         addSubview(icon)
-        addSubview(label)
+        addSubview(nameEdit)
         addSubview(countLabel)
         addSubview(separator)
 
         icon.translatesAutoresizingMaskIntoConstraints = false
-        label.translatesAutoresizingMaskIntoConstraints = false
+        nameEdit.translatesAutoresizingMaskIntoConstraints = false
         countLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
@@ -209,10 +223,11 @@ class PinnedGroupRow: NSView {
             icon.widthAnchor.constraint(equalToConstant: 16),
             icon.heightAnchor.constraint(equalToConstant: 16),
 
-            label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            nameEdit.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
+            nameEdit.centerYAnchor.constraint(equalTo: centerYAnchor),
+            nameEdit.trailingAnchor.constraint(equalTo: countLabel.leadingAnchor, constant: -6),
 
-            countLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: label.trailingAnchor, multiplier: 1),
+            countLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             countLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
 
@@ -220,13 +235,35 @@ class PinnedGroupRow: NSView {
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    @objc func nameEdited(sender: NSTextField) {
+        let newTitle = sender.stringValue.trimmingCharacters(in: .whitespaces)
+        if newTitle.isEmpty {
+            sender.stringValue = group.title
+            return
+        }
+        store.renameGroup(id: group.id, title: newTitle)
+    }
 }
 
 // MARK: - PinnedItemRow
 
-/// Renders ANY pinned item as an album-style row with cover art and title.
+/// Renders ANY pinned item as an album-style row with cover art, title, and unpin button.
 class PinnedItemRow: NSView {
-    init(item: NaviolaPinnedItem) {
+    private let item: NaviolaPinnedItem
+    private let store: NaviolaPinnedItemStore
+    private var onUnpin: (() -> Void)?
+    private let pinButton = ImageButton()
+
+    private let pinIcons = [
+        false: NSImage(systemSymbolName: NSImage.Name("pin"), accessibilityDescription: "Pin")?.tint(color: .lightGray),
+        true: NSImage(systemSymbolName: NSImage.Name("pin.fill"), accessibilityDescription: "Pinned")?.tint(color: .systemYellow),
+    ]
+
+    init(item: NaviolaPinnedItem, store: NaviolaPinnedItemStore, onUnpin: (() -> Void)? = nil) {
+        self.item = item
+        self.store = store
+        self.onUnpin = onUnpin
         super.init(frame: NSRect())
 
         let coverImageView = NSImageView()
@@ -259,16 +296,23 @@ class PinnedItemRow: NSView {
         detailLabel.textColor = .secondaryLabelColor
         detailLabel.stringValue = item.subtitle ?? item.type.rawValue.capitalized
 
+        pinButton.target = self
+        pinButton.action = #selector(pinClicked(sender:))
+        pinButton.image = pinIcons[true]!
+        pinButton.toolTip = NSLocalizedString("Unpin", comment: "Unpin button tooltip")
+
         let separator = Separator()
 
         addSubview(coverImageView)
         addSubview(nameLabel)
         addSubview(detailLabel)
+        addSubview(pinButton)
         addSubview(separator)
 
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         detailLabel.translatesAutoresizingMaskIntoConstraints = false
+        pinButton.translatesAutoresizingMaskIntoConstraints = false
 
         let artSize: CGFloat = 36
 
@@ -278,8 +322,13 @@ class PinnedItemRow: NSView {
             coverImageView.widthAnchor.constraint(equalToConstant: artSize),
             coverImageView.heightAnchor.constraint(equalToConstant: artSize),
 
+            pinButton.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            pinButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            pinButton.widthAnchor.constraint(equalToConstant: 16),
+            pinButton.heightAnchor.constraint(equalToConstant: 16),
+
             nameLabel.leadingAnchor.constraint(equalTo: coverImageView.trailingAnchor, constant: 8),
-            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -8),
+            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: pinButton.leadingAnchor, constant: -8),
             nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 5),
 
             detailLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
@@ -291,4 +340,9 @@ class PinnedItemRow: NSView {
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    @objc private func pinClicked(sender: NSButton) {
+        store.remove(id: item.id)
+        onUnpin?()
+    }
 }
