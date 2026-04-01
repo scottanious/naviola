@@ -1,7 +1,7 @@
 #!/bin/bash
 # v 0.1
 
-APP_NAME=Radiola
+APP_NAME=Naviola
 CERT_IDENTITY="Developer ID Application: Alex Sokolov (635H9TYSZJ)"
 KEYCHAIN_PROFILE="NotaryTool"
 
