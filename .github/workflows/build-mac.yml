@@ -65,8 +65,13 @@ jobs:
             build/*.dmg
             build/metadata.txt
 
-      - name: Upload release asset
+      - name: Create or update release
         if: github.ref_type == 'tag'
-        run: gh release upload "${{ github.ref_name }}" build/*.dmg --clobber
+        run: |
+          gh release create "${{ github.ref_name }}" build/*.dmg \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            --prerelease \
+          || gh release upload "${{ github.ref_name }}" build/*.dmg --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
