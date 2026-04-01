@@ -89,6 +89,12 @@ Translations managed via Transifex (`.tx/` directory). String catalog at `Radiol
 
 XCTest in `RadiolaTests/`. Test data fixtures in `RadiolaTests/data/` with subdirectories per test suite. Base class `RadiolaTests` provides utilities: `dataDir`, `walkDataDir`, `findFile`, `glob`.
 
+## Git Identity
+
+All commits must use the following identity:
+- **Name:** `Scottanious`
+- **Email:** `73787+scottanious@users.noreply.github.com`
+
 ## KeyboardShortcuts
 
 Bundled library (not a package dependency) in `KeyboardShortcuts/` for global hotkey registration via Carbon APIs.
