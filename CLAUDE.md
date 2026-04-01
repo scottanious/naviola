@@ -12,7 +12,7 @@ Upstream repo: `SokoloffA/radiola` (branch: `main`)
 
 ```bash
 # Run unit tests (no code signing needed)
-xcodebuild test -scheme Radiola CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+xcodebuild test -scheme Naviola CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
 
 # Build release (requires code signing credentials)
 ./build.sh

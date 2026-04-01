@@ -1,5 +1,5 @@
 {
-    "title": "Radiola",
+    "title": "Naviola",
     "format": "UDZO",
     "compression-level": 9,
     "window": { 
@@ -13,7 +13,7 @@
             "x": 135, 
             "y": 102, 
             "type": "file",
-            "path": "Radiola.app" },
+            "path": "Naviola.app" },
         
         { 
             "x": 365, 
